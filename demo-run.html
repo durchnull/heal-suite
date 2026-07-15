@@ -1,0 +1,1207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Heal Suite — sample run dashboard</title>
+<meta name="description" content="A sample /heal:all run: 14 auditors fused into one health dashboard — findings, trends, and genuine cost data." />
+<meta property="og:title" content="Heal Suite — sample run dashboard" />
+<meta property="og:description" content="A sample /heal:all run: 14 auditors fused into one health dashboard — findings, trends, and genuine cost data." />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Heal Suite" />
+<meta property="og:url" content="https://durchnull.github.io/heal-suite/demo-run.html" />
+<meta property="og:image" content="https://durchnull.github.io/heal-suite/og-demo-run.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://durchnull.github.io/heal-suite/og-demo-run.png" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🩺</text></svg>" />
+<style>
+:root{--bg:#f7f8fa;--card:#fff;--ink:#1a1d21;--muted:#6b7280;--line:#e5e7eb;
+  --good:#15803d;--good-bg:#dcfce7;--warn:#b45309;--warn-bg:#fef3c7;--bad:#b91c1c;--bad-bg:#fee2e2;
+  --info:#1d4ed8;--info-bg:#dbeafe;--h:#dc2626;--m:#f59e0b;--l:#94a3b8;--hd-h:0px;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:0 0 4rem}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em;background:#eef0f3;padding:.05em .35em;border-radius:4px}
+a{color:var(--info);text-decoration:none}a:hover{text-decoration:underline}
+.muted{color:var(--muted)}
+.hd{background:var(--card);border-bottom:1px solid var(--line);padding:1.4rem 1.6rem}
+.hd-row{display:flex;align-items:center;gap:.8rem}
+.hd h1{font-size:1.35rem;margin:0;font-weight:650}
+.hd .meta{margin:.4rem 0 0;font-size:.85rem;color:var(--muted)}
+.meta{font-size:.85rem;color:var(--muted)}
+section{max-width:1080px;margin:1.4rem auto;padding:0 1.6rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem}
+.card{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:10px;padding:1rem 1.1rem}
+.card.good{border-left-color:var(--good)}.card.warn{border-left-color:var(--warn)}.card.bad{border-left-color:var(--bad)}
+.card-val{font-size:1.9rem;font-weight:700;line-height:1}
+.card-lbl{font-size:.82rem;font-weight:600;margin-top:.45rem}
+.card-sub{font-size:.78rem;color:var(--muted);margin-top:.2rem}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1.2rem 1.4rem}
+.panel h2{font-size:1.05rem;margin:0 0 .9rem}
+.badge{display:inline-block;font-size:.72rem;font-weight:650;padding:.12em .6em;border-radius:999px;text-transform:uppercase;letter-spacing:.02em}
+.badge.good{background:var(--good-bg);color:var(--good)}
+.badge.warn{background:var(--warn-bg);color:var(--warn)}
+.badge.bad{background:var(--bad-bg);color:var(--bad)}
+.badge.info{background:var(--info-bg);color:var(--info)}
+.badge.muted-badge{background:#f1f5f9;color:var(--muted)}
+.bar{display:flex;height:30px;border-radius:7px;overflow:hidden;background:#eef0f3}
+.seg{display:flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem;font-weight:650;min-width:1.6rem}
+.seg.sev-h{background:var(--h)}.seg.sev-m{background:var(--m)}.seg.sev-l{background:var(--l)}
+.legend{display:flex;gap:1.2rem;margin-top:.7rem;font-size:.83rem;color:var(--muted)}
+.dot{display:inline-block;width:.7em;height:.7em;border-radius:50%;margin-right:.4em;vertical-align:middle}
+.dot.sev-h{background:var(--h)}.dot.sev-m{background:var(--m)}.dot.sev-l{background:var(--l)}
+.empty{color:var(--good);font-weight:600}
+table.grid{width:100%;border-collapse:collapse;font-size:.86rem}
+table.grid th,table.grid td{text-align:left;padding:.5rem .6rem;border-bottom:1px solid var(--line)}
+table.grid th{font-size:.72rem;text-transform:uppercase;letter-spacing:.03em;color:var(--muted)}
+table.grid td.num{text-align:right;font-variant-numeric:tabular-nums}
+.sev-h-t{color:var(--h);font-weight:700}.sev-m-t{color:var(--m);font-weight:700}.sev-l-t{color:var(--l);font-weight:600}
+td.z{color:#cbd5e1}
+.muted-row td{color:var(--muted)}
+.tbars{display:flex;flex-direction:column;gap:.55rem}
+.tbar-row{display:flex;align-items:center;gap:.8rem}
+.tbar-lbl{width:90px;font-size:.82rem;color:var(--muted)}
+.tbar-track{flex:1;background:#eef0f3;border-radius:6px;height:16px;overflow:hidden}
+.tbar-fill{height:100%;border-radius:6px}
+.tbar-fill.tk-in{background:#3b82f6}.tbar-fill.tk-out{background:#8b5cf6}
+.tbar-fill.tk-cr{background:#10b981}.tbar-fill.tk-cw{background:#f59e0b}
+.tbar-val{width:64px;text-align:right;font-size:.82rem;font-variant-numeric:tabular-nums}
+.healer{background:var(--card);border:1px solid var(--line);border-radius:10px;margin:.8rem 0}
+.healer>summary{display:flex;align-items:center;gap:.7rem;padding:.8rem 1.1rem;cursor:pointer;list-style:none;user-select:none;
+  position:sticky;top:var(--hd-h);z-index:3;background:var(--card);border-radius:10px}
+.healer[open]>summary{border-radius:10px 10px 0 0;border-bottom:1px solid var(--line)}
+.healer>summary::-webkit-details-marker{display:none}
+.healer>summary:hover{background:#fafbfc}
+.h-name{font-weight:650;font-size:1rem;min-width:90px}
+.h-sev{font-family:ui-monospace,monospace;font-size:.82rem;color:var(--muted)}
+.h-score{font-size:.78rem;color:var(--muted);margin-left:auto}
+.h-body{padding:.2rem 1.4rem 1.2rem}
+.h-body h4,.h-body h5,.h-body h6{margin:1.1rem 0 .4rem;font-size:.95rem}
+.h-body p{margin:.5rem 0}
+.h-body ul,.h-body ol{margin:.4rem 0;padding-left:1.3rem}
+.h-body table.md{width:100%;border-collapse:collapse;font-size:.82rem;margin:.7rem 0;display:block;overflow-x:auto}
+.h-body table.md th,.h-body table.md td{border:1px solid var(--line);padding:.4rem .55rem;text-align:left;vertical-align:top}
+.h-body table.md th{background:#f8fafc;font-size:.72rem;text-transform:uppercase;letter-spacing:.02em;color:var(--muted)}
+.h-body pre{background:#1e293b;color:#e2e8f0;padding:.8rem 1rem;border-radius:8px;overflow-x:auto;font-size:.8rem}
+.h-body pre code{background:none;color:inherit;padding:0}
+.ssfs{background:var(--info-bg);border:1px solid var(--info);border-left-width:4px;border-radius:8px;
+  padding:.2rem 1rem .9rem;margin:1.1rem 0}
+.ssfs>h4:first-child{margin-top:.7rem;color:var(--info)}
+.ssfs ul,.ssfs ol{margin:.4rem 0}
+.ssfs-item{border:1px solid var(--line);border-radius:10px;padding:.2rem 1.1rem 1rem;margin:.8rem 0;background:#fbfdff}
+.ssfs-h{display:flex;align-items:center;gap:.6rem;font-size:1rem;margin:.9rem 0 .2rem}
+.ssfs-item-body p{margin:.4rem 0}
+.ssfs-item-body ul,.ssfs-item-body ol{margin:.3rem 0;padding-left:1.3rem}
+.ft{max-width:1080px;margin:2rem auto 0;padding:0 1.6rem;font-size:.8rem;color:var(--muted)}
+
+/* tabs */
+.tabs{max-width:1080px;margin:1.4rem auto .2rem;padding:0 1.6rem;display:flex;gap:.3rem;flex-wrap:wrap;
+  border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;background:var(--bg)}
+.tab{appearance:none;border:none;background:none;font:inherit;font-size:.9rem;font-weight:600;color:var(--muted);
+  padding:.7rem 1rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;border-radius:6px 6px 0 0}
+.tab:hover{color:var(--ink);background:var(--card)}
+.tab.active{color:var(--info);border-bottom-color:var(--info)}
+.tabpanel{display:none}
+.tabpanel.active{display:block}
+.tabpanel .panel{margin-top:0}
+.tabpanel>.panel+.panel{margin-top:1.4rem}
+.empty-note{color:var(--muted)}
+
+/* preventions column pill + per-healer preventions */
+.prev-pill{display:inline-block;min-width:1.5em;padding:.05em .5em;border-radius:999px;background:var(--info-bg);color:var(--info);font-weight:700;font-size:.8rem}
+.h-preventions{margin:1.2rem 0 .4rem;border-top:1px dashed var(--line);padding-top:.9rem}
+.h-prev-h{display:flex;align-items:center;gap:.5rem;font-size:.9rem;margin:0 0 .5rem}
+.prev-count{display:inline-flex;align-items:center;justify-content:center;min-width:1.5em;height:1.5em;border-radius:999px;background:var(--info-bg);color:var(--info);font-size:.72rem;font-weight:700}
+.prev-list{list-style:none;margin:.3rem 0;padding:0;display:flex;flex-direction:column;gap:.4rem}
+.prev-row{display:flex;align-items:flex-start;gap:.6rem;background:#fbfdff;border:1px solid var(--line);border-radius:8px;padding:.5rem .7rem}
+.prev-row.prev-detect{background:#fafafa;opacity:.85}
+.prev-badge{flex:none;font-size:.66rem;font-weight:700;padding:.15em .55em;border-radius:999px;text-transform:uppercase;letter-spacing:.02em;margin-top:.1em}
+.prev-badge.info{background:var(--info-bg);color:var(--info)}
+.prev-badge.warn{background:var(--warn-bg);color:var(--warn)}
+.prev-badge.muted-badge{background:#f1f5f9;color:var(--muted)}
+.prev-text{font-size:.86rem;line-height:1.45}
+.prev-chan{color:var(--muted);font-size:.8rem}
+.prev-occ{color:var(--info);font-weight:650;font-size:.78rem}
+
+/* findings-detail statistics strip */
+.h-stats,.prev-strip{display:flex;flex-wrap:wrap;gap:.6rem;margin:1.2rem 0 .2rem}
+.h-stats{border-top:1px dashed var(--line);padding-top:.9rem}
+.stat{flex:1 1 auto;min-width:80px;background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:.5rem .7rem;text-align:center}
+.stat-v{display:block;font-size:1.05rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat-k{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);margin-top:.25rem}
+.prev-strip .stat{background:var(--info-bg);border-color:transparent}
+.prev-strip .stat-v{color:var(--info)}
+.prev-strip .stat-k{color:var(--info)}
+.prev-body{margin-top:.6rem}
+.prev-body table.md{width:100%;border-collapse:collapse;font-size:.84rem;margin:.7rem 0;display:block;overflow-x:auto}
+.prev-body table.md th,.prev-body table.md td{border:1px solid var(--line);padding:.45rem .55rem;text-align:left;vertical-align:top}
+.prev-body table.md th{background:#f8fafc;font-size:.7rem;text-transform:uppercase;letter-spacing:.02em;color:var(--muted)}
+.prev-body h3,.prev-body h4{margin:1.1rem 0 .4rem;font-size:.98rem}
+.prev-body pre{background:#1e293b;color:#e2e8f0;padding:.8rem 1rem;border-radius:8px;overflow-x:auto;font-size:.8rem}
+.prev-body pre code{background:none;color:inherit;padding:0}
+.prev-body ul,.prev-body ol{margin:.4rem 0;padding-left:1.3rem}
+
+/* trend tab */
+.trend-fixed{color:var(--good);font-weight:700}
+.trend-total td{font-weight:700;border-top:2px solid var(--line)}
+.trend-ids{list-style:none;margin:.3rem 0 .9rem;padding:0;display:flex;flex-direction:column;gap:.25rem}
+.trend-ids code{font-size:.8rem}
+
+/* history tab */
+.hist-current td{background:var(--info-bg)}
+.hist-barcell{min-width:120px}
+.hist-track{background:#eef0f3;border-radius:5px;height:12px;overflow:hidden}
+.hist-fill{height:100%;border-radius:5px;background:var(--m)}
+</style>
+</head>
+<body>
+<header class="hd">
+  <div class="hd-row">
+    <h1>Project health <span class="muted">/heal:all</span></h1>
+    <span class="badge muted-badge">complete</span>
+  </div>
+  <p class="meta">
+    Run <code>2026-07-12T10-39-53Z-demo</code> · mode <code>report-only</code>
+    · started 2026-07-12 10:39:53 UTC · finished 2026-07-12 11:58:35 UTC
+    · wall clock 78m 42s
+  </p>
+  <p class="meta" style="margin-top:6px; padding:8px 12px; background:#fef3e2; border:1px solid #f0d9b5; border-radius:8px; max-width:720px;">
+    <b>Sample dashboard.</b> Rendered by the suite's real report generator, but the audited
+    project (<code>acme/storefront</code>) and its findings are fictional demo content —
+    the run's duration and token statistics are genuine numbers from a production sweep.
+  </p>
+</header>
+
+<section class="cards">
+  <div class="card bad">
+    <div class="card-val">18.9</div>
+    <div class="card-lbl">Findings burden</div>
+    <div class="card-sub">headline · severity-weighted, baseline-excluded · prev 24.6</div>
+  </div>
+  <div class="card bad">
+    <div class="card-val">27</div>
+    <div class="card-lbl">Total findings</div>
+    <div class="card-sub">1 high · 12 med · 14 low</div>
+  </div>
+  <div class="card warn">
+    <div class="card-val">87</div>
+    <div class="card-lbl">Health score (advisory)</div>
+    <div class="card-sub">mean of 3 scored axes · not run-to-run comparable</div>
+  </div>
+  <div class="card info">
+    <div class="card-val">5</div>
+    <div class="card-lbl">Total preventions</div>
+    <div class="card-sub">3 guardrails · 3 promotions</div>
+  </div>
+  <div class="card bad">
+    <div class="card-val">60%</div>
+    <div class="card-lbl">Prevention score</div>
+    <div class="card-sub">these guardrails would prevent 3/5 finding-classes</div>
+  </div>
+  <div class="card warn">
+    <div class="card-val">11/14</div>
+    <div class="card-lbl">Healers with findings</div>
+    <div class="card-sub">3 clean · 0 partial</div>
+  </div>
+  <div class="card ">
+    <div class="card-val">59.1M</div>
+    <div class="card-lbl">Tokens (run total)</div>
+    <div class="card-sub">78m 42s across 14 healers</div>
+  </div>
+  <div class="card ">
+    <div class="card-val">~$49</div>
+    <div class="card-lbl">Cost (notional)</div>
+    <div class="card-sub">API-equivalent — a Pro/Max subscription isn't billed per token</div>
+  </div>
+</section>
+
+<nav class="tabs" role="tablist">
+  <button class="tab active" role="tab" data-tab="dashboard">Dashboard</button>
+  <button class="tab" role="tab" data-tab="trend">Trend</button>
+  <button class="tab" role="tab" data-tab="history">History</button>
+  <button class="tab" role="tab" data-tab="ssfs">Smallest safe first steps</button>
+  <button class="tab" role="tab" data-tab="preventions">Preventions combined</button>
+  <button class="tab" role="tab" data-tab="findings">Findings</button>
+  <button class="tab" role="tab" data-tab="tokens">Token breakdown</button>
+</nav>
+
+<div class="tabpanels">
+<section class="tabpanel active" id="tab-dashboard" role="tabpanel">
+  <div class="panel">
+    <h2>Findings by severity</h2>
+    <div class="bar"><div class="seg sev-h" style="flex:1" title="1 high"><span>1</span></div><div class="seg sev-m" style="flex:12" title="12 medium"><span>12</span></div><div class="seg sev-l" style="flex:14" title="14 low"><span>14</span></div></div>
+    <div class="legend">
+      <span><i class="dot sev-h"></i>1 high</span>
+      <span><i class="dot sev-m"></i>12 medium</span>
+      <span><i class="dot sev-l"></i>14 low</span>
+    </div>
+  </div>
+  <div class="panel">
+    <h2>Dashboard</h2>
+    <table class="grid">
+      <thead><tr>
+        <th>Healer</th><th>Status</th><th>Findings</th><th>Preventions</th><th>H</th><th>M</th><th>L</th>
+        <th>Score</th><th>Fixed</th><th>Duration</th><th>Tokens</th><th>~$</th><th>Backlog heading</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+        <td><a href="#h-self" data-goto="findings">self</a></td>
+        <td><span class="badge good">clean</span></td>
+        <td class="num">0</td>
+        <td class="num"><span class="z">0</span></td>
+        <td class="num z">0</td>
+        <td class="num z">0</td>
+        <td class="num z">0</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td class="num">4m 37s</td>
+        <td class="num">4.1M</td>
+        <td class="num">$6.64</td>
+        <td class="muted">—</td>
+      </tr>
+        <tr>
+        <td><a href="#h-arch" data-goto="findings">arch</a></td>
+        <td><span class="badge good">clean</span></td>
+        <td class="num">0</td>
+        <td class="num"><span class="z">0</span></td>
+        <td class="num z">0</td>
+        <td class="num z">0</td>
+        <td class="num z">0</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td class="num">4m 1s</td>
+        <td class="num">1.4M</td>
+        <td class="num">$2.08</td>
+        <td class="muted">—</td>
+      </tr>
+        <tr>
+        <td><a href="#h-api" data-goto="findings">api</a></td>
+        <td><span class="badge warn">findings</span></td>
+        <td class="num">1</td>
+        <td class="num"><span class="z">0</span></td>
+        <td class="num z">0</td>
+        <td class="num sev-m-t">1</td>
+        <td class="num z">0</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td class="num">6m 54s</td>
+        <td class="num">2.5M</td>
+        <td class="num">$2.66</td>
+        <td class="muted">## API contract health</td>
+      </tr>
+        <tr>
+        <td><a href="#h-db" data-goto="findings">db</a></td>
+        <td><span class="badge good">clean</span></td>
+        <td class="num">0</td>
+        <td class="num"><span class="z">0</span></td>
+        <td class="num z">0</td>
+        <td class="num z">0</td>
+        <td class="num z">0</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td class="num">4m 8s</td>
+        <td class="num">1.3M</td>
+        <td class="num">$1.86</td>
+        <td class="muted">—</td>
+      </tr>
+        <tr>
+        <td><a href="#h-ci" data-goto="findings">ci</a></td>
+        <td><span class="badge warn">findings</span></td>
+        <td class="num">2</td>
+        <td class="num"><span class="z">0</span></td>
+        <td class="num z">0</td>
+        <td class="num sev-m-t">1</td>
+        <td class="num sev-l-t">1</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td class="num">9m 38s</td>
+        <td class="num">5.8M</td>
+        <td class="num">$3.21</td>
+        <td class="muted">## CI/CD health</td>
+      </tr>
+        <tr>
+        <td><a href="#h-packages" data-goto="findings">packages</a></td>
+        <td><span class="badge warn">findings</span></td>
+        <td class="num">6</td>
+        <td class="num"><span class="z">0</span></td>
+        <td class="num z">0</td>
+        <td class="num sev-m-t">2</td>
+        <td class="num sev-l-t">4</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td class="num">9m 40s</td>
+        <td class="num">4.9M</td>
+        <td class="num">$2.78</td>
+        <td class="muted">## Dependency health</td>
+      </tr>
+        <tr>
+        <td><a href="#h-ai" data-goto="findings">ai</a></td>
+        <td><span class="badge warn">findings</span></td>
+        <td class="num">1</td>
+        <td class="num"><span class="z">0</span></td>
+        <td class="num z">0</td>
+        <td class="num z">0</td>
+        <td class="num sev-l-t">1</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td class="num">4m 1s</td>
+        <td class="num">2.2M</td>
+        <td class="num">$2.90</td>
+        <td class="muted">## AI/LLM health</td>
+      </tr>
+        <tr>
+        <td><a href="#h-security" data-goto="findings">security</a></td>
+        <td><span class="badge warn">findings</span></td>
+        <td class="num">2</td>
+        <td class="num"><span class="z">0</span></td>
+        <td class="num z">0</td>
+        <td class="num sev-m-t">1</td>
+        <td class="num sev-l-t">1</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td class="num">3m 43s</td>
+        <td class="num">3.2M</td>
+        <td class="num">$3.12</td>
+        <td class="muted">## Security health</td>
+      </tr>
+        <tr>
+        <td><a href="#h-tests" data-goto="findings">tests</a></td>
+        <td><span class="badge warn">findings</span></td>
+        <td class="num">1</td>
+        <td class="num"><span class="prev-pill">1</span></td>
+        <td class="num z">0</td>
+        <td class="num z">0</td>
+        <td class="num sev-l-t">1</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td class="num">4m 17s</td>
+        <td class="num">1.0M</td>
+        <td class="num">$1.33</td>
+        <td class="muted">## Test-suite health</td>
+      </tr>
+        <tr>
+        <td><a href="#h-quality" data-goto="findings">quality</a></td>
+        <td><span class="badge warn">findings</span></td>
+        <td class="num">3</td>
+        <td class="num"><span class="prev-pill">1</span></td>
+        <td class="num z">0</td>
+        <td class="num sev-m-t">1</td>
+        <td class="num sev-l-t">2</td>
+        <td class="num">88</td>
+        <td class="num">—</td>
+        <td class="num">4m 18s</td>
+        <td class="num">1.3M</td>
+        <td class="num">$1.66</td>
+        <td class="muted">## Quality debt</td>
+      </tr>
+        <tr>
+        <td><a href="#h-perf" data-goto="findings">perf</a></td>
+        <td><span class="badge warn">findings</span></td>
+        <td class="num">2</td>
+        <td class="num"><span class="z">0</span></td>
+        <td class="num z">0</td>
+        <td class="num z">0</td>
+        <td class="num sev-l-t">2</td>
+        <td class="num">90</td>
+        <td class="num">—</td>
+        <td class="num">3m 29s</td>
+        <td class="num">1.7M</td>
+        <td class="num">$2.11</td>
+        <td class="muted">## Performance health</td>
+      </tr>
+        <tr>
+        <td><a href="#h-docs" data-goto="findings">docs</a></td>
+        <td><span class="badge warn">findings</span></td>
+        <td class="num">3</td>
+        <td class="num"><span class="prev-pill">1</span></td>
+        <td class="num z">0</td>
+        <td class="num sev-m-t">2</td>
+        <td class="num sev-l-t">1</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td class="num">5m 34s</td>
+        <td class="num">4.6M</td>
+        <td class="num">$2.49</td>
+        <td class="muted">## Docs drift</td>
+      </tr>
+        <tr>
+        <td><a href="#h-a11y" data-goto="findings">a11y</a></td>
+        <td><span class="badge warn">findings</span></td>
+        <td class="num">3</td>
+        <td class="num"><span class="prev-pill">1</span></td>
+        <td class="num sev-h-t">1</td>
+        <td class="num sev-m-t">2</td>
+        <td class="num z">0</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td class="num">7m 4s</td>
+        <td class="num">12.1M</td>
+        <td class="num">$5.04</td>
+        <td class="muted">## Accessibility health</td>
+      </tr>
+        <tr>
+        <td><a href="#h-design" data-goto="findings">design</a></td>
+        <td><span class="badge warn">findings</span></td>
+        <td class="num">3</td>
+        <td class="num"><span class="prev-pill">1</span></td>
+        <td class="num z">0</td>
+        <td class="num sev-m-t">2</td>
+        <td class="num sev-l-t">1</td>
+        <td class="num">82</td>
+        <td class="num">—</td>
+        <td class="num">7m 18s</td>
+        <td class="num">5.3M</td>
+        <td class="num">$2.51</td>
+        <td class="muted">## UI consistency</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="tabpanel" id="tab-trend" role="tabpanel">
+  <div class="panel">
+    <h2>Trend vs previous run</h2>
+    <p class="meta">Joined by finding id against run <code>2026-07-05T09-01-27Z-dm03</code>
+    · burden 24.6 → 18.9 (severity-weighted, baseline-excluded).</p>
+  <table class="grid">
+      <thead><tr><th>Healer</th><th>New</th><th>Fixed</th><th>Persisting</th><th>Accepted</th></tr></thead>
+      <tbody>
+        <tr><td>self</td><td class="num z">0</td><td class="num trend-fixed">1</td><td class="num z">0</td><td class="num z">0</td></tr>
+        <tr><td>arch</td><td class="num z">0</td><td class="num z">0</td><td class="num z">0</td><td class="num z">0</td></tr>
+        <tr><td>api</td><td class="num z">0</td><td class="num trend-fixed">1</td><td class="num sev-m-t">1</td><td class="num z">0</td></tr>
+        <tr><td>db</td><td class="num z">0</td><td class="num trend-fixed">1</td><td class="num z">0</td><td class="num z">0</td></tr>
+        <tr><td>ci</td><td class="num sev-h-t">1</td><td class="num trend-fixed">1</td><td class="num sev-m-t">1</td><td class="num z">0</td></tr>
+        <tr><td>packages</td><td class="num z">0</td><td class="num trend-fixed">2</td><td class="num sev-m-t">6</td><td class="num z">0</td></tr>
+        <tr><td>ai</td><td class="num sev-h-t">1</td><td class="num trend-fixed">1</td><td class="num z">0</td><td class="num z">0</td></tr>
+        <tr><td>security</td><td class="num z">0</td><td class="num trend-fixed">1</td><td class="num sev-m-t">1</td><td class="num ">1</td></tr>
+        <tr><td>tests</td><td class="num z">0</td><td class="num trend-fixed">1</td><td class="num sev-m-t">1</td><td class="num z">0</td></tr>
+        <tr><td>quality</td><td class="num sev-h-t">1</td><td class="num trend-fixed">1</td><td class="num sev-m-t">2</td><td class="num z">0</td></tr>
+        <tr><td>perf</td><td class="num sev-h-t">1</td><td class="num trend-fixed">1</td><td class="num sev-m-t">1</td><td class="num z">0</td></tr>
+        <tr><td>docs</td><td class="num sev-h-t">2</td><td class="num trend-fixed">1</td><td class="num sev-m-t">1</td><td class="num z">0</td></tr>
+        <tr><td>a11y</td><td class="num sev-h-t">1</td><td class="num trend-fixed">1</td><td class="num sev-m-t">2</td><td class="num z">0</td></tr>
+        <tr><td>design</td><td class="num z">0</td><td class="num trend-fixed">1</td><td class="num sev-m-t">3</td><td class="num z">0</td></tr>
+        <tr class="trend-total"><td>total</td><td class="num">7</td><td class="num">14</td><td class="num">19</td><td class="num">1</td></tr>
+      </tbody>
+    </table>
+  <h4>New findings</h4><ul class="trend-ids"><li><code>ci:missing-concurrency:github/workflows/test.yml</code></li><li><code>ai:legacy-model-alias:apps/server/src/services/description-service.ts</code></li><li><code>quality:any-casts:apps/storefront/src/lib/cart-mapper.ts</code></li><li><code>perf:hero-asset:apps/storefront/src/pages/home.tsx</code></li><li><code>docs:removed-script:README.md</code></li><li><code>docs:phantom-env-var:README.md</code></li><li><code>a11y:placeholder-labels:apps/storefront/src/checkout/checkout-form.tsx</code></li></ul>
+  <h4>Fixed since the previous run</h4><ul class="trend-ids"><li><code>self:stale-cited-path:.claude/commands/heal/perf.md</code></li><li><code>api:orphan-route:apps/server/src/routes/legacy-webhooks.ts</code></li><li><code>db:unindexed-fk:apps/server/src/db/schema.ts</code></li><li><code>ci:unpinned-action-sha:github/workflows/deploy.yml</code></li><li><code>packages:deprecated-dep:apps/server/package.json</code></li><li><code>packages:stale-types:package.json</code></li><li><code>ai:removed-sampling-param:apps/server/src/services/description-service.ts</code></li><li><code>security:missing-security-headers:apps/server/src/app.ts</code></li><li><code>tests:flaky-retry-poll:apps/server/src/services/inventory.test.ts</code></li><li><code>quality:dead-exports:packages/shared/src/index.ts</code></li><li><code>perf:n-plus-one-order-list:apps/server/src/services/order-service.ts</code></li><li><code>docs:wrong-build-command:README.md</code></li><li><code>a11y:low-contrast-muted:apps/storefront/src/styles/tokens.css</code></li><li><code>design:inconsistent-empty-state:apps/storefront/src/pages</code></li></ul>
+  <h4>Accepted (baseline)</h4><ul class="trend-ids"><li><code>security:cookie-samesite:apps/server/src/lib/session.ts</code></li></ul>
+  
+  </div>
+</section>
+
+<section class="tabpanel" id="tab-history" role="tabpanel">
+  <div class="panel">
+    <h2>Run history</h2>
+    <p class="meta">Last 4 of 4 completed heal/all runs. Machine-local (<code>logs/</code> is gitignored) — burden is severity-weighted and baseline-excluded.</p>
+  <table class="grid">
+    <thead><tr><th>Run</th><th>Finished</th><th>Healers</th><th>Findings</th><th>Burden</th><th></th><th>Score</th><th>Tokens</th></tr></thead>
+    <tbody>
+        <tr>
+        <td><code>2026-06-21T09-02-11Z-dm01</code></td>
+        <td>2026-06-21 10:31:40 UTC</td>
+        <td class="num">14</td>
+        <td class="num">41</td>
+        <td class="num">39.8</td>
+        <td class="hist-barcell"><div class="hist-track"><div class="hist-fill" style="width:100%"></div></div></td>
+        <td class="num">79</td>
+        <td class="num">61.2M</td>
+      </tr>
+        <tr>
+        <td><code>2026-06-28T09-05-42Z-dm02</code></td>
+        <td>2026-06-28 10:19:05 UTC</td>
+        <td class="num">14</td>
+        <td class="num">38</td>
+        <td class="num">31.5</td>
+        <td class="hist-barcell"><div class="hist-track"><div class="hist-fill" style="width:79.14572864321609%"></div></div></td>
+        <td class="num">81</td>
+        <td class="num">55.9M</td>
+      </tr>
+        <tr>
+        <td><code>2026-07-05T09-01-27Z-dm03</code></td>
+        <td>2026-07-05 10:21:44 UTC</td>
+        <td class="num">14</td>
+        <td class="num">34</td>
+        <td class="num">24.6</td>
+        <td class="hist-barcell"><div class="hist-track"><div class="hist-fill" style="width:61.809045226130664%"></div></div></td>
+        <td class="num">82</td>
+        <td class="num">52.5M</td>
+      </tr>
+        <tr class="hist-current">
+        <td><code>2026-07-12T10-39-53Z-demo</code></td>
+        <td>2026-07-12 11:58:35 UTC</td>
+        <td class="num">14</td>
+        <td class="num">27</td>
+        <td class="num">18.9</td>
+        <td class="hist-barcell"><div class="hist-track"><div class="hist-fill" style="width:47.48743718592965%"></div></div></td>
+        <td class="num">87</td>
+        <td class="num">59.1M</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="tabpanel" id="tab-ssfs" role="tabpanel">
+  <div class="panel">
+    <h2>Smallest safe first steps — combined</h2>
+    <p class="meta">The first action each healer recommends, gathered for a single triage pass.</p>
+    <div class="ssfs-item">
+      <h3 class="ssfs-h"><a href="#h-self">self</a> <span class="badge good">clean</span></h3>
+      <div class="ssfs-item-body"><p>Nothing to do — the suite still describes the repo as it is. Keep the discipline: any rename that touches a path a healer cites should run <code>/heal:self</code> in the same PR.</p></div>
+    </div>
+<div class="ssfs-item">
+      <h3 class="ssfs-h"><a href="#h-arch">arch</a> <span class="badge good">clean</span></h3>
+      <div class="ssfs-item-body"><p>Nothing to do. Watch the seam that historically drifts first: any new route that returns computed totals should call the shared engine, never re-derive.</p></div>
+    </div>
+<div class="ssfs-item">
+      <h3 class="ssfs-h"><a href="#h-api">api</a> <span class="badge warn">findings</span></h3>
+      <div class="ssfs-item-body"><p>Fix the delete wrapper's return type first — it is the only remaining mismatch, and the change is 3 lines plus the contract test.</p></div>
+    </div>
+<div class="ssfs-item">
+      <h3 class="ssfs-h"><a href="#h-db">db</a> <span class="badge good">clean</span></h3>
+      <div class="ssfs-item-body"><p>Nothing to do — the history applies cleanly, exactly once, in order. Keep indexing new hot-path FKs at declaration time as 0031 did.</p></div>
+    </div>
+<div class="ssfs-item">
+      <h3 class="ssfs-h"><a href="#h-ci">ci</a> <span class="badge warn">findings</span></h3>
+      <div class="ssfs-item-body"><p>Apply the artifact-action bump — it is mechanical, and the EOL clock is running.</p></div>
+    </div>
+<div class="ssfs-item">
+      <h3 class="ssfs-h"><a href="#h-packages">packages</a> <span class="badge warn">findings</span></h3>
+      <div class="ssfs-item-body"><p>Take the four low-severity bumps as one <code>--fix</code> batch (lint, test runner, data-fetching, icons) — green CI on one PR retires two thirds of this axis's count.</p></div>
+    </div>
+<div class="ssfs-item">
+      <h3 class="ssfs-h"><a href="#h-ai">ai</a> <span class="badge warn">findings</span></h3>
+      <div class="ssfs-item-body"><p>Take the alias bump with the fixture regeneration in one commit — cheapest finding on the board this sweep.</p></div>
+    </div>
+<div class="ssfs-item">
+      <h3 class="ssfs-h"><a href="#h-security">security</a> <span class="badge warn">findings</span></h3>
+      <div class="ssfs-item-body"><p>Land the reset-endpoint limiter with its 429 test — the only open medium on this axis, and the fix is a copy of an existing pattern.</p></div>
+    </div>
+<div class="ssfs-item">
+      <h3 class="ssfs-h"><a href="#h-tests">tests</a> <span class="badge warn">findings</span></h3>
+      <div class="ssfs-item-body"><p>Repair the checkout-total assertion — a money-path test that can't fail is worse than no test, because it reads as coverage.</p></div>
+    </div>
+<div class="ssfs-item">
+      <h3 class="ssfs-h"><a href="#h-quality">quality</a> <span class="badge warn">findings</span></h3>
+      <div class="ssfs-item-body"><p>Delete the duplicated price helper (5-minute PR), then schedule the order-service split — it is the root of both the complexity and half the review friction on this axis.</p></div>
+    </div>
+<div class="ssfs-item">
+      <h3 class="ssfs-h"><a href="#h-perf">perf</a> <span class="badge warn">findings</span></h3>
+      <div class="ssfs-item-body"><p>Compress the hero image — one asset swap, measurable on every first visit.</p></div>
+    </div>
+<div class="ssfs-item">
+      <h3 class="ssfs-h"><a href="#h-docs">docs</a> <span class="badge warn">findings</span></h3>
+      <div class="ssfs-item-body"><p>Apply the two mechanical fixes under <code>--fix</code>, then decide the phantom env var — it is the only judgment item on this axis.</p></div>
+    </div>
+<div class="ssfs-item">
+      <h3 class="ssfs-h"><a href="#h-a11y">a11y</a> <span class="badge warn">findings</span></h3>
+      <div class="ssfs-item-body"><p>Fix the checkout labels today — one high on the money path outweighs everything else in this report combined.</p></div>
+    </div>
+<div class="ssfs-item">
+      <h3 class="ssfs-h"><a href="#h-design">design</a> <span class="badge warn">findings</span></h3>
+      <div class="ssfs-item-body"><p>Swap the three spinners for the shared primitive — smallest diff, and it retires the axis's most visible inconsistency.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="tabpanel" id="tab-preventions" role="tabpanel">
+  <div class="panel">
+    <h2>Preventions — combined</h2>
+    
+    <div class="prev-strip">
+    <div class="stat"><span class="stat-v">5</span><span class="stat-k">proposed</span></div>
+    <div class="stat"><span class="stat-v">3</span><span class="stat-k">with a guardrail</span></div>
+    <div class="stat"><span class="stat-v">3</span><span class="stat-k">promotions</span></div>
+    <div class="stat"><span class="stat-v">60%</span><span class="stat-k">would-solve score</span></div>
+  </div>
+  <p class="meta">A guardrail proposal for every finding — promotions and recurring classes first, first-sight below. Suggest-only: run <code>/heal:prevent --apply</code> to write the low-risk artifacts.</p><div class="prev-body"><h3>heal:prevent — guardrail proposals (run 2026-07-12T10-39-53Z-demo)</h3>
+<ul><li><strong>Run read:</strong> <code>.heal/runs/2026-07-12T10-39-53Z-demo</code> — a whole-repo <code>report-only</code> <code>/heal:all</code> (14 healers, <code>main</code> @ <code>9f3d7c1</code>). <strong>Suggest-only</strong> (no <code>--apply</code>): every artifact below is drafted, nothing written except the backlog convergence.</li><li><strong>Recurrence summary:</strong> 27 findings across 14 healers; after folding into classes and excluding the baseline-accepted id: <strong>5 guardrail proposals</strong> — 3 recurring (occ &gt; 1, seen in <code>2026-07-05T09-01-27Z-dm03</code> too), 2 first-sight. Burden trend across the two runs: 24.6 → 18.9.</li><li><strong>Held guardrails:</strong> the security-headers middleware, the FK-index rule, and the fake-timers test convention — all added after previous findings, none of their classes recurred this run.</li></ul>
+<h4>Prevention backlog</h4>
+<table class="md"><thead><tr><th>Finding (axis)</th><th>Occurrences</th><th>Would-prevent layer</th><th>Channel</th><th>New / Promote</th><th>Generalises?</th></tr></thead><tbody><tr><td>Raw select and hand-rolled spinners bypassing shared primitives (design)</td><td>3</td><td>lint no-restricted-syntax on raw select + spinner markup in app code (design)</td><td>Rule</td><td>Promote</td><td>yes</td></tr><tr><td>Unnamed icon buttons and placeholder-only labels (a11y)</td><td>2</td><td>jsx-a11y lint preset + aria-label as a required prop type (a11y)</td><td>Rule/Code</td><td>Promote</td><td>yes</td></tr><tr><td>God module regrowth past the size-watch threshold (quality)</td><td>3</td><td>stays detect — module splits are judgment; size-watch already ranks it first (quality)</td><td>(detect)</td><td>Promote</td><td>no</td></tr><tr><td>README documents removed scripts and phantom env vars (docs)</td><td>1</td><td>script comparing package.json scripts + env reads to README, wired pre-commit (docs)</td><td>Code/Script</td><td>New</td><td>yes</td></tr><tr><td>Presence-only assertions on money-path tests (tests)</td><td>2</td><td>stays detect — asserting the value is a per-test judgment call (tests)</td><td>(detect)</td><td>New</td><td>no</td></tr></tbody></table>
+<h4>Notes</h4>
+<ul><li>The two <strong>Promote</strong> rule rows recur despite an existing convention doc — escalated from</li></ul>
+<p>prose to lint enforcement, the cheapest layer that makes the class impossible.</p>
+<ul><li>The docs script proposal ships as an inert draft under <code>scripts/proposals/</code>;</li></ul>
+<p>wiring it into pre-commit stays a human call.</p>
+<ul><li>The god-module row is a deliberate <strong>detect-only promote</strong>: emphasis escalates in the</li></ul>
+<p>report, but a split is never proposed as a mechanical artifact.</p></div>
+  </div>
+</section>
+
+<section class="tabpanel" id="tab-findings" role="tabpanel">
+  <div class="panel">
+    <h2>Findings detail</h2>
+    <p class="meta">Each healer's full report, in run order. Report-only — nothing auto-applied.</p>
+    <details class="healer" id="h-self" >
+    <summary>
+      <span class="h-name">self</span>
+      <span class="badge good">clean</span>
+      <span class="h-sev">0/0/0</span>
+      
+    </summary>
+    <div class="h-body"><h3>heal:self — Meta-audit of the heal/* commands</h3>
+<h4>1. Scope</h4>
+<p>Whole-repo sweep of <code>acme/storefront</code> (demo target), compared against the previous sweep (<code>2026-07-05T09-01-27Z-dm03</code>). <strong>Report-only</strong> — nothing was changed; low-risk items are marked auto-fixable under <code>--fix</code>.</p>
+<h4>2. What was checked</h4>
+<table class="md"><thead><tr><th>Check</th><th>Status</th></tr></thead><tbody><tr><td>Cited paths/commands in all 14 healer specs exist</td><td>OK — 0 dangling references</td></tr><tr><td>Asserted facts match the project's CLAUDE.md</td><td>OK</td></tr><tr><td>Coverage: repo surfaces vs healer roster</td><td>OK — no orphan surface</td></tr><tr><td>Suite doc drift (README / overview page / run order)</td><td>OK</td></tr><tr><td>Structural gate (<code>check-heal-suite.mjs</code>)</td><td>OK (exit 0)</td></tr></tbody></table>
+<h4>3. Findings</h4>
+<p>None. The previous sweep's finding (a healer citing a renamed script) was fixed and did not recur — the guardrail added for it (path check in the structural gate) is holding.</p>
+<div class="ssfs"><h4>4. Smallest safe first step</h4>
+<p>Nothing to do — the suite still describes the repo as it is. Keep the discipline: any rename that touches a path a healer cites should run <code>/heal:self</code> in the same PR.</p>
+</div><h4>5. Fix summary</h4>
+<p>Report-only run; nothing changed.</p>
+<h4>TODO delta</h4>
+<p>none</p><div class="h-stats" aria-label="run statistics">
+    <div class="stat"><span class="stat-v">4m 37s</span><span class="stat-k">Duration</span></div>
+    <div class="stat"><span class="stat-v">52</span><span class="stat-k">Turns</span></div>
+    <div class="stat"><span class="stat-v">104</span><span class="stat-k">Input</span></div>
+    <div class="stat"><span class="stat-v">22.2k</span><span class="stat-k">Output</span></div>
+    <div class="stat"><span class="stat-v">3.4M</span><span class="stat-k">Cache read</span></div>
+    <div class="stat"><span class="stat-v">702.5k</span><span class="stat-k">Cache write</span></div>
+    <div class="stat"><span class="stat-v">4.1M</span><span class="stat-k">Total tokens</span></div>
+  </div></div>
+  </details>
+<details class="healer" id="h-arch" >
+    <summary>
+      <span class="h-name">arch</span>
+      <span class="badge good">clean</span>
+      <span class="h-sev">0/0/0</span>
+      
+    </summary>
+    <div class="h-body"><h3>heal:arch — Architecture drift vs the committed invariants</h3>
+<h4>1. Scope</h4>
+<p>Whole-repo sweep of <code>acme/storefront</code> (demo target), compared against the previous sweep (<code>2026-07-05T09-01-27Z-dm03</code>). <strong>Report-only</strong> — nothing was changed; low-risk items are marked auto-fixable under <code>--fix</code>.</p>
+<h4>2. What was checked</h4>
+<table class="md"><thead><tr><th>Invariant</th><th>Status</th></tr></thead><tbody><tr><td>HTTP boundary — no <code>apps/server</code> ↔ <code>apps/storefront</code> imports</td><td>OK</td></tr><tr><td><code>packages/shared</code> purity (no I/O, no framework imports)</td><td>OK</td></tr><tr><td>Single source of pricing math (no hand-rolled totals)</td><td>OK</td></tr><tr><td>Server/client DTO parity on shared shapes</td><td>OK</td></tr><tr><td>Deterministic arch gate</td><td>OK (exit 0)</td></tr></tbody></table>
+<h4>3. Findings</h4>
+<p>None. The pricing engine remains the only place money math happens — both the checkout route and the storefront preview import it from <code>packages/shared</code>, and no arithmetic on raw price fields appears outside it.</p>
+<div class="ssfs"><h4>4. Smallest safe first step</h4>
+<p>Nothing to do. Watch the seam that historically drifts first: any new route that returns computed totals should call the shared engine, never re-derive.</p>
+</div><h4>5. Fix summary</h4>
+<p>Report-only run; nothing changed.</p>
+<h4>TODO delta</h4>
+<p>none</p><div class="h-stats" aria-label="run statistics">
+    <div class="stat"><span class="stat-v">4m 1s</span><span class="stat-k">Duration</span></div>
+    <div class="stat"><span class="stat-v">30</span><span class="stat-k">Turns</span></div>
+    <div class="stat"><span class="stat-v">52</span><span class="stat-k">Input</span></div>
+    <div class="stat"><span class="stat-v">5.9k</span><span class="stat-k">Output</span></div>
+    <div class="stat"><span class="stat-v">1.1M</span><span class="stat-k">Cache read</span></div>
+    <div class="stat"><span class="stat-v">218.7k</span><span class="stat-k">Cache write</span></div>
+    <div class="stat"><span class="stat-v">1.4M</span><span class="stat-k">Total tokens</span></div>
+  </div></div>
+  </details>
+<details class="healer" id="h-api" open>
+    <summary>
+      <span class="h-name">api</span>
+      <span class="badge warn">findings</span>
+      <span class="h-sev">0/1/0</span>
+      
+    </summary>
+    <div class="h-body"><h3>heal:api — API contracts across the HTTP boundary</h3>
+<h4>1. Scope</h4>
+<p>Whole-repo sweep of <code>acme/storefront</code> (demo target), compared against the previous sweep (<code>2026-07-05T09-01-27Z-dm03</code>). <strong>Report-only</strong> — nothing was changed; low-risk items are marked auto-fixable under <code>--fix</code>.</p>
+<h4>2. What was checked</h4>
+<p>42 routes ↔ 42 client fetch wrappers, request schemas on every mutating route, the shared error-code union, and cache invalidation after each mutation.</p>
+<h4>3. Findings</h4>
+<h5>M — response-shape drift · <code>apps/server/src/routes/orders.ts:142</code> *(persisting — 2nd sweep)*</h5>
+<p><code>DELETE /orders/:id</code> returns <code>{ deleted: true }</code> but the client wrapper types the response as <code>void</code>, so the flag is silently discarded and a future consumer would type-check against the wrong shape.</p>
+<ul><li><strong>Suggested fix:</strong> align the wrapper's return type with the server (or drop the body</li></ul>
+<p>server-side) — one commit touching both sides of the boundary, which is why this is never auto-applied.</p>
+<ul><li><strong>Suggested test:</strong> a contract test asserting the parsed response of the delete wrapper</li></ul>
+<p>matches the route's serialized output for a fixture order.</p>
+<p>The orphan legacy-webhooks route flagged last sweep was removed — confirmed gone.</p>
+<div class="ssfs"><h4>4. Smallest safe first step</h4>
+<p>Fix the delete wrapper's return type first — it is the only remaining mismatch, and the change is 3 lines plus the contract test.</p>
+</div><h4>5. Fix summary</h4>
+<p>Report-only run; nothing changed.</p>
+<h4>TODO delta</h4>
+<p>API contract health — 1 open item(s) converged.</p><div class="h-stats" aria-label="run statistics">
+    <div class="stat"><span class="stat-v">6m 54s</span><span class="stat-k">Duration</span></div>
+    <div class="stat"><span class="stat-v">51</span><span class="stat-k">Turns</span></div>
+    <div class="stat"><span class="stat-v">98</span><span class="stat-k">Input</span></div>
+    <div class="stat"><span class="stat-v">13.2k</span><span class="stat-k">Output</span></div>
+    <div class="stat"><span class="stat-v">2.3M</span><span class="stat-k">Cache read</span></div>
+    <div class="stat"><span class="stat-v">189.9k</span><span class="stat-k">Cache write</span></div>
+    <div class="stat"><span class="stat-v">2.5M</span><span class="stat-k">Total tokens</span></div>
+  </div></div>
+  </details>
+<details class="healer" id="h-db" >
+    <summary>
+      <span class="h-name">db</span>
+      <span class="badge good">clean</span>
+      <span class="h-sev">0/0/0</span>
+      
+    </summary>
+    <div class="h-body"><h3>heal:db — Database schema &amp; migration health</h3>
+<h4>1. Scope</h4>
+<p>Whole-repo sweep of <code>acme/storefront</code> (demo target), compared against the previous sweep (<code>2026-07-05T09-01-27Z-dm03</code>). <strong>Report-only</strong> — nothing was changed; low-risk items are marked auto-fixable under <code>--fix</code>.</p>
+<h4>2. What was checked</h4>
+<table class="md"><thead><tr><th>Invariant</th><th>Status</th></tr></thead><tbody><tr><td>Journal ordering strictly monotonic</td><td>OK (31 entries)</td></tr><tr><td>Schema ↔ migration drift (<code>drizzle-kit check</code>)</td><td>OK</td></tr><tr><td>FKs indexed on hot paths</td><td>OK — <code>order_items.order_id</code> index added since last sweep</td></tr><tr><td>Backfill-safe data migrations (add-nullable → backfill → NOT NULL)</td><td>OK</td></tr><tr><td>Multi-step writes transactional</td><td>OK</td></tr><tr><td>Destructive DDL intentional &amp; commented</td><td>OK</td></tr></tbody></table>
+<h4>3. Findings</h4>
+<p>None. Last sweep's unindexed foreign key on <code>order_items.order_id</code> was fixed in migration 0031 — the checkout hot path now walks an index.</p>
+<div class="ssfs"><h4>4. Smallest safe first step</h4>
+<p>Nothing to do — the history applies cleanly, exactly once, in order. Keep indexing new hot-path FKs at declaration time as 0031 did.</p>
+</div><h4>5. Fix summary</h4>
+<p>Report-only run; nothing changed.</p>
+<h4>TODO delta</h4>
+<p>none</p><div class="h-stats" aria-label="run statistics">
+    <div class="stat"><span class="stat-v">4m 8s</span><span class="stat-k">Duration</span></div>
+    <div class="stat"><span class="stat-v">37</span><span class="stat-k">Turns</span></div>
+    <div class="stat"><span class="stat-v">70</span><span class="stat-k">Input</span></div>
+    <div class="stat"><span class="stat-v">9.3k</span><span class="stat-k">Output</span></div>
+    <div class="stat"><span class="stat-v">1.2M</span><span class="stat-k">Cache read</span></div>
+    <div class="stat"><span class="stat-v">166.6k</span><span class="stat-k">Cache write</span></div>
+    <div class="stat"><span class="stat-v">1.3M</span><span class="stat-k">Total tokens</span></div>
+  </div></div>
+  </details>
+<details class="healer" id="h-ci" open>
+    <summary>
+      <span class="h-name">ci</span>
+      <span class="badge warn">findings</span>
+      <span class="h-sev">0/1/1</span>
+      
+    </summary>
+    <div class="h-body"><h3>heal:ci — CI/CD pipeline health</h3>
+<h4>1. Scope</h4>
+<p>Whole-repo sweep of <code>acme/storefront</code> (demo target), compared against the previous sweep (<code>2026-07-05T09-01-27Z-dm03</code>). <strong>Report-only</strong> — nothing was changed; low-risk items are marked auto-fixable under <code>--fix</code>.</p>
+<h4>2. What was checked</h4>
+<p>Runtime currency (runner images, action majors), hermeticity, least-privilege (<code>permissions:</code> per job, no <code>pull_request_target</code>, no untrusted-code execution), and log quietness (zero tolerated deprecation warnings).</p>
+<h4>3. Findings</h4>
+<h5>M — deprecated action major · <code>.github/workflows/test.yml:58</code> *(persisting — 2nd sweep)*</h5>
+<p>The artifact-upload action is pinned to a major with an announced EOL date.</p>
+<ul><li><strong>Suggested fix:</strong> bump the major (one line, no config change) — auto-fixable under</li></ul>
+<p><code>--fix</code>. Flagged last sweep too; it should not survive a third.</p>
+<ul><li><strong>Suggested test:</strong> none needed — the workflow run itself verifies.</li></ul>
+<h5>L — no concurrency group · <code>.github/workflows/test.yml:3</code> *(new)*</h5>
+<p>Rapid consecutive pushes run duplicate jobs to completion.</p>
+<ul><li><strong>Suggested fix:</strong> a <code>concurrency:</code> block keyed on the ref with</li></ul>
+<p><code>cancel-in-progress: true</code>.</p>
+<p>The unpinned third-party action flagged last sweep is now pinned to a full commit SHA — fixed and verified.</p>
+<div class="ssfs"><h4>4. Smallest safe first step</h4>
+<p>Apply the artifact-action bump — it is mechanical, and the EOL clock is running.</p>
+</div><h4>5. Fix summary</h4>
+<p>Report-only run; nothing changed.</p>
+<h4>TODO delta</h4>
+<p>CI/CD health — 2 open item(s) converged.</p><div class="h-stats" aria-label="run statistics">
+    <div class="stat"><span class="stat-v">9m 38s</span><span class="stat-k">Duration</span></div>
+    <div class="stat"><span class="stat-v">91</span><span class="stat-k">Turns</span></div>
+    <div class="stat"><span class="stat-v">3.9k</span><span class="stat-k">Input</span></div>
+    <div class="stat"><span class="stat-v">29.9k</span><span class="stat-k">Output</span></div>
+    <div class="stat"><span class="stat-v">5.4M</span><span class="stat-k">Cache read</span></div>
+    <div class="stat"><span class="stat-v">296.9k</span><span class="stat-k">Cache write</span></div>
+    <div class="stat"><span class="stat-v">5.8M</span><span class="stat-k">Total tokens</span></div>
+  </div></div>
+  </details>
+<details class="healer" id="h-packages" open>
+    <summary>
+      <span class="h-name">packages</span>
+      <span class="badge warn">findings</span>
+      <span class="h-sev">0/2/4</span>
+      
+    </summary>
+    <div class="h-body"><h3>heal:packages — Dependency currency &amp; trust</h3>
+<h4>1. Scope</h4>
+<p>Whole-repo sweep of <code>acme/storefront</code> (demo target), compared against the previous sweep (<code>2026-07-05T09-01-27Z-dm03</code>). <strong>Report-only</strong> — nothing was changed; low-risk items are marked auto-fixable under <code>--fix</code>.</p>
+<h4>2. What was checked</h4>
+<p>Currency across all three workspaces (respecting the declared pins), plus the trust pass: deprecated/archived deps, typosquat-adjacent names, new install scripts, lockfile integrity.</p>
+<h4>3. Findings</h4>
+<p>Six packages behind, all within range — 2 medium (the framework minors and a transitive advisory awaiting an upstream release) and 4 routine patch/minor lags. All are safe in-range bumps under <code>--fix</code>; the changelogs were read, none touches a breaking surface.</p>
+<p>Since last sweep: the deprecated date library was replaced and the stale type-stub package removed — both confirmed gone from the lockfile.</p>
+<p>Trust pass: clean. No deprecated or archived direct deps remain, no new install scripts, lockfile integrity verified.</p>
+<div class="ssfs"><h4>4. Smallest safe first step</h4>
+<p>Take the four low-severity bumps as one <code>--fix</code> batch (lint, test runner, data-fetching, icons) — green CI on one PR retires two thirds of this axis's count.</p>
+</div><h4>5. Fix summary</h4>
+<p>Report-only run; nothing changed.</p>
+<h4>TODO delta</h4>
+<p>Dependency health — 6 open item(s) converged.</p><div class="h-stats" aria-label="run statistics">
+    <div class="stat"><span class="stat-v">9m 40s</span><span class="stat-k">Duration</span></div>
+    <div class="stat"><span class="stat-v">88</span><span class="stat-k">Turns</span></div>
+    <div class="stat"><span class="stat-v">176</span><span class="stat-k">Input</span></div>
+    <div class="stat"><span class="stat-v">41.9k</span><span class="stat-k">Output</span></div>
+    <div class="stat"><span class="stat-v">4.6M</span><span class="stat-k">Cache read</span></div>
+    <div class="stat"><span class="stat-v">204.7k</span><span class="stat-k">Cache write</span></div>
+    <div class="stat"><span class="stat-v">4.9M</span><span class="stat-k">Total tokens</span></div>
+  </div></div>
+  </details>
+<details class="healer" id="h-ai" open>
+    <summary>
+      <span class="h-name">ai</span>
+      <span class="badge warn">findings</span>
+      <span class="h-sev">0/0/1</span>
+      
+    </summary>
+    <div class="h-body"><h3>heal:ai — AI provider &amp; model health</h3>
+<h4>1. Scope</h4>
+<p>Whole-repo sweep of <code>acme/storefront</code> (demo target), compared against the previous sweep (<code>2026-07-05T09-01-27Z-dm03</code>). <strong>Report-only</strong> — nothing was changed; low-risk items are marked auto-fixable under <code>--fix</code>.</p>
+<h4>2. What was checked</h4>
+<p>The configured LLM provider registry: model ids active and non-deprecated, call-site parameters valid against current API docs, retry/timeout settings sane, and newly released models worth adopting.</p>
+<h4>3. Findings</h4>
+<h5>L — legacy model alias · <code>description-service.ts:27</code> *(new)*</h5>
+<p>The product-description generator pins a model alias that still resolves but has a newer snapshot at identical pricing with better instruction following.</p>
+<ul><li><strong>Suggested fix:</strong> one-line alias bump — auto-fixable under <code>--fix</code>.</li><li><strong>Suggested test:</strong> the existing golden-output test covers the swap (regenerate the</li></ul>
+<p>fixture once, review the diff).</p>
+<p>The removed sampling parameter flagged last sweep was cleaned up — the call site now passes only supported options.</p>
+<div class="ssfs"><h4>4. Smallest safe first step</h4>
+<p>Take the alias bump with the fixture regeneration in one commit — cheapest finding on the board this sweep.</p>
+</div><h4>5. Fix summary</h4>
+<p>Report-only run; nothing changed.</p>
+<h4>TODO delta</h4>
+<p>AI/LLM health — 1 open item(s) converged.</p><div class="h-stats" aria-label="run statistics">
+    <div class="stat"><span class="stat-v">4m 1s</span><span class="stat-k">Duration</span></div>
+    <div class="stat"><span class="stat-v">40</span><span class="stat-k">Turns</span></div>
+    <div class="stat"><span class="stat-v">4.5k</span><span class="stat-k">Input</span></div>
+    <div class="stat"><span class="stat-v">15.8k</span><span class="stat-k">Output</span></div>
+    <div class="stat"><span class="stat-v">1.9M</span><span class="stat-k">Cache read</span></div>
+    <div class="stat"><span class="stat-v">242.1k</span><span class="stat-k">Cache write</span></div>
+    <div class="stat"><span class="stat-v">2.2M</span><span class="stat-k">Total tokens</span></div>
+  </div></div>
+  </details>
+<details class="healer" id="h-security" open>
+    <summary>
+      <span class="h-name">security</span>
+      <span class="badge warn">findings</span>
+      <span class="h-sev">0/1/1</span>
+      
+    </summary>
+    <div class="h-body"><h3>heal:security — Application security</h3>
+<h4>1. Scope</h4>
+<p>Whole-repo sweep of <code>acme/storefront</code> (demo target), compared against the previous sweep (<code>2026-07-05T09-01-27Z-dm03</code>). <strong>Report-only</strong> — nothing was changed; low-risk items are marked auto-fixable under <code>--fix</code>.</p>
+<h4>2. What was checked</h4>
+<p>Secret hygiene, auth/session handling, access control on every data route (IDOR sweep), mass assignment, injection, XSS, CSRF, security response headers, and dependency advisories (<code>pnpm audit</code>).</p>
+<h4>3. Findings</h4>
+<h5>M — unthrottled password reset · <code>routes/auth.ts:96</code> *(persisting — 2nd sweep)*</h5>
+<p>The reset endpoint accepts unlimited requests, enabling enumeration and mail-bomb abuse.</p>
+<ul><li><strong>Suggested fix:</strong> reuse the login route's limiter (same window/threshold) —</li></ul>
+<p>mechanical, auto-fixable under <code>--fix</code>. Persisting a second sweep; prioritize.</p>
+<ul><li><strong>Suggested test:</strong> an integration test asserting the N+1-th request within the window</li></ul>
+<p>returns 429 and no mail job is enqueued.</p>
+<h5>L — SameSite=Lax · <code>lib/session.ts:18</code> *(accepted baseline)*</h5>
+<p>Standing tradeoff (cross-site navigation UX; CSRF covered by the token check). Re-reported for visibility; excluded from burden and NEW counts.</p>
+<p>Fixed since last sweep: the security response headers now ship on every route — the middleware added after the previous finding is verified present and correctly ordered.</p>
+<div class="ssfs"><h4>4. Smallest safe first step</h4>
+<p>Land the reset-endpoint limiter with its 429 test — the only open medium on this axis, and the fix is a copy of an existing pattern.</p>
+</div><h4>5. Fix summary</h4>
+<p>Report-only run; nothing changed.</p>
+<h4>TODO delta</h4>
+<p>Security health — 1 open item(s) converged.</p><div class="h-stats" aria-label="run statistics">
+    <div class="stat"><span class="stat-v">3m 43s</span><span class="stat-k">Duration</span></div>
+    <div class="stat"><span class="stat-v">69</span><span class="stat-k">Turns</span></div>
+    <div class="stat"><span class="stat-v">131</span><span class="stat-k">Input</span></div>
+    <div class="stat"><span class="stat-v">7.1k</span><span class="stat-k">Output</span></div>
+    <div class="stat"><span class="stat-v">2.9M</span><span class="stat-k">Cache read</span></div>
+    <div class="stat"><span class="stat-v">237.2k</span><span class="stat-k">Cache write</span></div>
+    <div class="stat"><span class="stat-v">3.2M</span><span class="stat-k">Total tokens</span></div>
+  </div></div>
+  </details>
+<details class="healer" id="h-tests" open>
+    <summary>
+      <span class="h-name">tests</span>
+      <span class="badge warn">findings</span>
+      <span class="h-sev">0/0/1</span>
+      
+    </summary>
+    <div class="h-body"><h3>heal:tests — Test-suite value</h3>
+<h4>1. Scope</h4>
+<p>Whole-repo sweep of <code>acme/storefront</code> (demo target), compared against the previous sweep (<code>2026-07-05T09-01-27Z-dm03</code>). <strong>Report-only</strong> — nothing was changed; low-risk items are marked auto-fixable under <code>--fix</code>.</p>
+<h4>2. What was checked</h4>
+<p>Assertion quality (no-assertion and presence-only tests), implementation coupling, redundancy, flakiness across recent runs, and coverage on the pricing engine's edge cases (rounding, currency, discount stacking).</p>
+<h4>3. Findings</h4>
+<h5>L — presence-only assertion · <code>order-service.test.ts:211</code> *(persisting — 2nd sweep)*</h5>
+<p>The checkout-total test asserts the result is defined but never the amount — it would pass for any wrong total on the money path.</p>
+<ul><li><strong>Suggested fix:</strong> assert the exact expected sum for the fixture cart (subtotal,</li></ul>
+<p>discount, tax lines individually).</p>
+<ul><li><strong>Suggested test:</strong> this *is* the test — repair, don't delete: the scenario is the</li></ul>
+<p>right one, only the assertion is hollow.</p>
+<p>Fixed since last sweep: the flaky inventory poll test now uses fake timers — zero flakes in the observed window.</p>
+<div class="ssfs"><h4>4. Smallest safe first step</h4>
+<p>Repair the checkout-total assertion — a money-path test that can't fail is worse than no test, because it reads as coverage.</p>
+</div><h4>5. Fix summary</h4>
+<p>Report-only run; nothing changed.</p>
+<h4>TODO delta</h4>
+<p>Test-suite health — 1 open item(s) converged.</p><div class="h-preventions">
+    <h4 class="h-prev-h">Preventions for this axis <span class="prev-count">1</span></h4>
+    <ul class="prev-list">
+      <li class="prev-row prev-detect">
+        <span class="prev-badge muted-badge">detect</span>
+        <span class="prev-text"><strong>Presence-only assertions on money-path tests</strong> — stays detect — asserting the value is a per-test judgment call (tests) <span class="prev-chan">(detect)</span> <span class="prev-occ" title="occurrences">×2</span></span>
+      </li>
+    </ul>
+  </div><div class="h-stats" aria-label="run statistics">
+    <div class="stat"><span class="stat-v">4m 17s</span><span class="stat-k">Duration</span></div>
+    <div class="stat"><span class="stat-v">36</span><span class="stat-k">Turns</span></div>
+    <div class="stat"><span class="stat-v">72</span><span class="stat-k">Input</span></div>
+    <div class="stat"><span class="stat-v">9.4k</span><span class="stat-k">Output</span></div>
+    <div class="stat"><span class="stat-v">905.3k</span><span class="stat-k">Cache read</span></div>
+    <div class="stat"><span class="stat-v">102.7k</span><span class="stat-k">Cache write</span></div>
+    <div class="stat"><span class="stat-v">1.0M</span><span class="stat-k">Total tokens</span></div>
+  </div></div>
+  </details>
+<details class="healer" id="h-quality" open>
+    <summary>
+      <span class="h-name">quality</span>
+      <span class="badge warn">findings</span>
+      <span class="h-sev">0/1/2</span>
+      <span class="h-score">score 88</span>
+    </summary>
+    <div class="h-body"><h3>heal:quality — Code quality</h3>
+<h4>1. Scope</h4>
+<p>Whole-repo sweep of <code>acme/storefront</code> (demo target), compared against the previous sweep (<code>2026-07-05T09-01-27Z-dm03</code>). <strong>Report-only</strong> — nothing was changed; low-risk items are marked auto-fixable under <code>--fix</code>.</p>
+<p>Score <strong>88/100</strong> (structure 90 · duplication 85 · complexity 92 · type-safety 85) — up from 84 last sweep after the dead-export cleanup landed.</p>
+<h4>2. What was checked</h4>
+<p>The deterministic size-watch + dead-export triage ranked the read; SOLID seams, duplication (jscpd-seeded), complexity hotspots, and type-safety erosion (<code>any</code>/assertion counts) audited on the ranked set.</p>
+<h4>3. Findings</h4>
+<h5>M — god module · <code>order-service.ts</code> *(persisting — 3rd sweep, escalated)*</h5>
+<p>700+ lines, 24 exports, three responsibilities (checkout, fulfilment, refunds). The size-watch has ranked it #1 three sweeps running.</p>
+<ul><li><strong>Suggested fix:</strong> split along the checkout/fulfilment seam first (the refund logic is</li></ul>
+<p>small enough to stay); judgment call, never auto-applied.</p>
+<ul><li><strong>Suggested test:</strong> none new — the existing service tests partition cleanly with the</li></ul>
+<p>split.</p>
+<h5>L — duplicated helper · <code>format-price.ts</code> *(persisting)* — the client re-implements</h5>
+<p><code>formatPrice</code> that <code>packages/shared</code> exports; delete and re-import.</p>
+<h5>L — type erosion · <code>cart-mapper.ts:44</code> *(new)* — three <code>as any</code> casts where the</h5>
+<p>inferred query type compiles; narrowing them keeps the DTO chain honest.</p>
+<div class="ssfs"><h4>4. Smallest safe first step</h4>
+<p>Delete the duplicated price helper (5-minute PR), then schedule the order-service split — it is the root of both the complexity and half the review friction on this axis.</p>
+</div><h4>5. Fix summary</h4>
+<p>Report-only run; nothing changed.</p>
+<h4>TODO delta</h4>
+<p>Quality debt — 3 open item(s) converged.</p><div class="h-preventions">
+    <h4 class="h-prev-h">Preventions for this axis <span class="prev-count">1</span></h4>
+    <ul class="prev-list">
+      <li class="prev-row prev-detect">
+        <span class="prev-badge muted-badge">detect</span>
+        <span class="prev-text"><strong>God module regrowth past the size-watch threshold</strong> — stays detect — module splits are judgment; size-watch already ranks it first (quality) <span class="prev-chan">(detect)</span> <span class="prev-occ" title="occurrences">×3</span></span>
+      </li>
+    </ul>
+  </div><div class="h-stats" aria-label="run statistics">
+    <div class="stat"><span class="stat-v">4m 18s</span><span class="stat-k">Duration</span></div>
+    <div class="stat"><span class="stat-v">38</span><span class="stat-k">Turns</span></div>
+    <div class="stat"><span class="stat-v">74</span><span class="stat-k">Input</span></div>
+    <div class="stat"><span class="stat-v">11.3k</span><span class="stat-k">Output</span></div>
+    <div class="stat"><span class="stat-v">1.2M</span><span class="stat-k">Cache read</span></div>
+    <div class="stat"><span class="stat-v">127.1k</span><span class="stat-k">Cache write</span></div>
+    <div class="stat"><span class="stat-v">1.3M</span><span class="stat-k">Total tokens</span></div>
+  </div></div>
+  </details>
+<details class="healer" id="h-perf" open>
+    <summary>
+      <span class="h-name">perf</span>
+      <span class="badge warn">findings</span>
+      <span class="h-sev">0/0/2</span>
+      <span class="h-score">score 90</span>
+    </summary>
+    <div class="h-body"><h3>heal:perf — Performance health</h3>
+<h4>1. Scope</h4>
+<p>Whole-repo sweep of <code>acme/storefront</code> (demo target), compared against the previous sweep (<code>2026-07-05T09-01-27Z-dm03</code>). <strong>Report-only</strong> — nothing was changed; low-risk items are marked auto-fixable under <code>--fix</code>.</p>
+<p>Score <strong>90/100</strong> (server 95 · bundle 92 · render 85) — up from 87 after the order-list N+1 fix landed.</p>
+<h4>2. What was checked</h4>
+<p>Server query shapes (N+1, over-fetch) across all list endpoints, the client bundle against its size budget, and render cost (avoidable re-renders, unbounded lists, asset loading).</p>
+<h4>3. Findings</h4>
+<h5>L — unvirtualized admin table · <code>product-table.tsx:31</code> *(persisting)*</h5>
+<p>Fine at demo scale; degrades past ~1k rows. Virtualize or paginate when the catalog grows — tracked, not urgent.</p>
+<h5>L — heavyweight hero asset · <code>home.tsx:12</code> *(new)*</h5>
+<p>Full-resolution image, no responsive sizes, no modern format — the largest single contributor to first-paint weight on the landing page.</p>
+<ul><li><strong>Suggested fix:</strong> responsive <code>srcset</code> + a compressed modern format; no layout change.</li></ul>
+<p>Fixed since last sweep: the order-list endpoint no longer issues one query per row — verified batched, p95 improved accordingly.</p>
+<div class="ssfs"><h4>4. Smallest safe first step</h4>
+<p>Compress the hero image — one asset swap, measurable on every first visit.</p>
+</div><h4>5. Fix summary</h4>
+<p>Report-only run; nothing changed.</p>
+<h4>TODO delta</h4>
+<p>Performance health — 2 open item(s) converged.</p><div class="h-stats" aria-label="run statistics">
+    <div class="stat"><span class="stat-v">3m 29s</span><span class="stat-k">Duration</span></div>
+    <div class="stat"><span class="stat-v">46</span><span class="stat-k">Turns</span></div>
+    <div class="stat"><span class="stat-v">79</span><span class="stat-k">Input</span></div>
+    <div class="stat"><span class="stat-v">12.6k</span><span class="stat-k">Output</span></div>
+    <div class="stat"><span class="stat-v">1.5M</span><span class="stat-k">Cache read</span></div>
+    <div class="stat"><span class="stat-v">169.3k</span><span class="stat-k">Cache write</span></div>
+    <div class="stat"><span class="stat-v">1.7M</span><span class="stat-k">Total tokens</span></div>
+  </div></div>
+  </details>
+<details class="healer" id="h-docs" open>
+    <summary>
+      <span class="h-name">docs</span>
+      <span class="badge warn">findings</span>
+      <span class="h-sev">0/2/1</span>
+      
+    </summary>
+    <div class="h-body"><h3>heal:docs — Documentation drift</h3>
+<h4>1. Scope</h4>
+<p>Whole-repo sweep of <code>acme/storefront</code> (demo target), compared against the previous sweep (<code>2026-07-05T09-01-27Z-dm03</code>). <strong>Report-only</strong> — nothing was changed; low-risk items are marked auto-fixable under <code>--fix</code>.</p>
+<h4>2. What was checked</h4>
+<p>Every documented command against <code>package.json</code> scripts, every documented env var against <code>.env.example</code> <strong>and</strong> actual reads in code, every cited path, and the setup walkthrough end-to-end.</p>
+<h4>3. Findings</h4>
+<h5>M — removed script still documented · <code>README.md:74</code> *(new)*</h5>
+<p>Copy-pasting the setup section fails at this step — the db helper script was removed two sprints ago.</p>
+<ul><li><strong>Suggested fix:</strong> delete the step (mechanical under <code>--fix</code>); the replacement command</li></ul>
+<p>is already documented two lines below.</p>
+<h5>M — phantom env var · <code>README.md:102</code> *(new)*</h5>
+<p>Documented and templated but read nowhere — either wire it or drop it. Judgment call: reported, not auto-fixed.</p>
+<h5>L — stale path · <code>CONTRIBUTING.md:33</code> *(persisting)* — moved one directory up in the</h5>
+<p>last refactor; mechanical fix.</p>
+<p>Fixed since last sweep: the wrong build command in the README was corrected.</p>
+<div class="ssfs"><h4>4. Smallest safe first step</h4>
+<p>Apply the two mechanical fixes under <code>--fix</code>, then decide the phantom env var — it is the only judgment item on this axis.</p>
+</div><h4>5. Fix summary</h4>
+<p>Report-only run; nothing changed.</p>
+<h4>TODO delta</h4>
+<p>Docs drift — 3 open item(s) converged.</p><div class="h-preventions">
+    <h4 class="h-prev-h">Preventions for this axis <span class="prev-count">1</span></h4>
+    <ul class="prev-list">
+      <li class="prev-row ">
+        <span class="prev-badge info">new</span>
+        <span class="prev-text"><strong>README documents removed scripts and phantom env vars</strong> — script comparing package.json scripts + env reads to README, wired pre-commit (docs) <span class="prev-chan">Code/Script</span> <span class="prev-occ" title="occurrences">×1</span></span>
+      </li>
+    </ul>
+  </div><div class="h-stats" aria-label="run statistics">
+    <div class="stat"><span class="stat-v">5m 34s</span><span class="stat-k">Duration</span></div>
+    <div class="stat"><span class="stat-v">82</span><span class="stat-k">Turns</span></div>
+    <div class="stat"><span class="stat-v">164</span><span class="stat-k">Input</span></div>
+    <div class="stat"><span class="stat-v">21.9k</span><span class="stat-k">Output</span></div>
+    <div class="stat"><span class="stat-v">4.4M</span><span class="stat-k">Cache read</span></div>
+    <div class="stat"><span class="stat-v">224.7k</span><span class="stat-k">Cache write</span></div>
+    <div class="stat"><span class="stat-v">4.6M</span><span class="stat-k">Total tokens</span></div>
+  </div></div>
+  </details>
+<details class="healer" id="h-a11y" open>
+    <summary>
+      <span class="h-name">a11y</span>
+      <span class="badge warn">findings</span>
+      <span class="h-sev">1/2/0</span>
+      
+    </summary>
+    <div class="h-body"><h3>heal:a11y — Web accessibility</h3>
+<h4>1. Scope</h4>
+<p>Whole-repo sweep of <code>acme/storefront</code> (demo target), compared against the previous sweep (<code>2026-07-05T09-01-27Z-dm03</code>). <strong>Report-only</strong> — nothing was changed; low-risk items are marked auto-fixable under <code>--fix</code>.</p>
+<h4>2. What was checked</h4>
+<p>Semantic HTML, accessible names/ARIA, keyboard operability, focus management, and contrast across every storefront route plus the admin pages.</p>
+<h4>3. Findings</h4>
+<h5>H — placeholder-only labels · <code>checkout-form.tsx:58</code> *(new — regression)*</h5>
+<p>The checkout redesign shipped inputs with placeholder text as the only label: screen readers announce empty fields, and the label vanishes the moment the user types. This is the highest-traffic form in the app.</p>
+<ul><li><strong>Suggested fix:</strong> visible <code>&lt;label htmlFor&gt;</code> per field — mechanical, auto-fixable</li></ul>
+<p>under <code>--fix</code>, no visual redesign required (the design already reserves the space).</p>
+<ul><li><strong>Suggested test:</strong> a render test asserting every checkout input has an accessible</li></ul>
+<p>name.</p>
+<h5>M — focus not trapped in modal · <code>modal.tsx:19</code> *(persisting — 2nd sweep)*</h5>
+<p>Tab walks out of the dialog into the obscured page. The component library in use ships a focus-trap — wire it.</p>
+<h5>M — unnamed icon buttons · <code>icon-button.tsx:9</code> *(persisting — 2nd sweep)*</h5>
+<ul><li><strong>Suggested fix:</strong> make <code>aria-label</code> a <strong>required prop</strong> so the gap cannot recur —</li></ul>
+<p>also proposed as a guardrail (see prevention backlog: recurring, promoted).</p>
+<p>Fixed since last sweep: the muted-text contrast failure — the token was darkened and re-verified at 4.6:1.</p>
+<div class="ssfs"><h4>4. Smallest safe first step</h4>
+<p>Fix the checkout labels today — one high on the money path outweighs everything else in this report combined.</p>
+</div><h4>5. Fix summary</h4>
+<p>Report-only run; nothing changed.</p>
+<h4>TODO delta</h4>
+<p>Accessibility health — 3 open item(s) converged.</p><div class="h-preventions">
+    <h4 class="h-prev-h">Preventions for this axis <span class="prev-count">1</span></h4>
+    <ul class="prev-list">
+      <li class="prev-row ">
+        <span class="prev-badge warn">promote</span>
+        <span class="prev-text"><strong>Unnamed icon buttons and placeholder-only labels</strong> — jsx-a11y lint preset + aria-label as a required prop type (a11y) <span class="prev-chan">Rule/Code</span> <span class="prev-occ" title="occurrences">×2</span></span>
+      </li>
+    </ul>
+  </div><div class="h-stats" aria-label="run statistics">
+    <div class="stat"><span class="stat-v">7m 4s</span><span class="stat-k">Duration</span></div>
+    <div class="stat"><span class="stat-v">117</span><span class="stat-k">Turns</span></div>
+    <div class="stat"><span class="stat-v">234</span><span class="stat-k">Input</span></div>
+    <div class="stat"><span class="stat-v">23.2k</span><span class="stat-k">Output</span></div>
+    <div class="stat"><span class="stat-v">11.7M</span><span class="stat-k">Cache read</span></div>
+    <div class="stat"><span class="stat-v">312.3k</span><span class="stat-k">Cache write</span></div>
+    <div class="stat"><span class="stat-v">12.1M</span><span class="stat-k">Total tokens</span></div>
+  </div></div>
+  </details>
+<details class="healer" id="h-design" open>
+    <summary>
+      <span class="h-name">design</span>
+      <span class="badge warn">findings</span>
+      <span class="h-sev">0/2/1</span>
+      <span class="h-score">score 82</span>
+    </summary>
+    <div class="h-body"><h3>heal:design — UI consistency &amp; design-system adherence</h3>
+<h4>1. Scope</h4>
+<p>Whole-repo sweep of <code>acme/storefront</code> (demo target), compared against the previous sweep (<code>2026-07-05T09-01-27Z-dm03</code>). <strong>Report-only</strong> — nothing was changed; low-risk items are marked auto-fixable under <code>--fix</code>.</p>
+<p>Score <strong>82/100</strong> (reuse 75 · tokens 90 · responsive 85 · gallery 80) — up from 76 after the empty-state unification landed.</p>
+<h4>2. What was checked</h4>
+<p>The jscpd duplicate-cluster precompute seeded the read: duplicated markup, raw HTML where a primitive exists, styling-token drift, responsive integrity at the mobile floor, and component-gallery completeness.</p>
+<h4>3. Findings</h4>
+<h5>M — hand-rolled loading states · <code>src/pages</code> *(persisting — 3rd sweep, escalated)*</h5>
+<p>Three pages re-implement a spinner the design system exports; visually inconsistent and each a divergence point. Recurs despite the convention doc — promoted to a lint proposal (see prevention backlog).</p>
+<h5>M — raw <code>&lt;select&gt;</code> · <code>filters.tsx:66</code> *(persisting — 3rd sweep, escalated)*</h5>
+<p>Bypasses the shared Select primitive; renders unstyled on two browsers. Same promotion.</p>
+<h5>L — off-scale spacing · <code>summary.tsx:23</code> *(persisting)* — one arbitrary pixel value</h5>
+<p>outside the spacing tokens; mechanical token swap.</p>
+<p>Fixed since last sweep: the four inconsistent empty-state layouts were unified onto the shared <code>EmptyState</code> component.</p>
+<div class="ssfs"><h4>4. Smallest safe first step</h4>
+<p>Swap the three spinners for the shared primitive — smallest diff, and it retires the axis's most visible inconsistency.</p>
+</div><h4>5. Fix summary</h4>
+<p>Report-only run; nothing changed.</p>
+<h4>TODO delta</h4>
+<p>UI consistency — 3 open item(s) converged.</p><div class="h-preventions">
+    <h4 class="h-prev-h">Preventions for this axis <span class="prev-count">1</span></h4>
+    <ul class="prev-list">
+      <li class="prev-row ">
+        <span class="prev-badge warn">promote</span>
+        <span class="prev-text"><strong>Raw select and hand-rolled spinners bypassing shared primitives</strong> — lint no-restricted-syntax on raw select + spinner markup in app code (design) <span class="prev-chan">Rule</span> <span class="prev-occ" title="occurrences">×3</span></span>
+      </li>
+    </ul>
+  </div><div class="h-stats" aria-label="run statistics">
+    <div class="stat"><span class="stat-v">7m 18s</span><span class="stat-k">Duration</span></div>
+    <div class="stat"><span class="stat-v">92</span><span class="stat-k">Turns</span></div>
+    <div class="stat"><span class="stat-v">184</span><span class="stat-k">Input</span></div>
+    <div class="stat"><span class="stat-v">26.6k</span><span class="stat-k">Output</span></div>
+    <div class="stat"><span class="stat-v">5.2M</span><span class="stat-k">Cache read</span></div>
+    <div class="stat"><span class="stat-v">149.4k</span><span class="stat-k">Cache write</span></div>
+    <div class="stat"><span class="stat-v">5.3M</span><span class="stat-k">Total tokens</span></div>
+  </div></div>
+  </details>
+  </div>
+</section>
+
+<section class="tabpanel" id="tab-tokens" role="tabpanel">
+  <div class="panel">
+    <h2>Token breakdown</h2>
+    <div class="tbars"><div class="tbar-row"><span class="tbar-lbl">Input</span>
+          <div class="tbar-track"><div class="tbar-fill tk-in" style="width:0.018152350505029384%"></div></div>
+          <span class="tbar-val">10.0k · $0.05</span></div><div class="tbar-row"><span class="tbar-lbl">Output</span>
+          <div class="tbar-track"><div class="tbar-fill tk-out" style="width:0.6426880390125841%"></div></div>
+          <span class="tbar-val">353.8k · $8.84</span></div><div class="tbar-row"><span class="tbar-lbl">Cache read</span>
+          <div class="tbar-track"><div class="tbar-fill tk-cr" style="width:100%"></div></div>
+          <span class="tbar-val">55.0M · $28</span></div><div class="tbar-row"><span class="tbar-lbl">Cache write</span>
+          <div class="tbar-track"><div class="tbar-fill tk-cw" style="width:6.679985051561159%"></div></div>
+          <span class="tbar-val">3.7M · $23</span></div></div>
+    <p class="meta">967 turns · per-tier $ above priced at the run's dominant model (claude-opus-4-8) to show the tier mix — cache-read dominates the token count but is billed at a steep discount vs fresh input. The exact per-model total (~$49) is on the Cost card, which prices each healer at its own model; a Pro/Max subscription isn't billed per token.</p>
+  </div>
+</section>
+</div>
+
+<footer class="ft">
+  Generated by <code>scripts/heal-report.mjs</code> · 2026-07-15 12:07:14 UTC
+</footer>
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.tab'));
+  var panels=[].slice.call(document.querySelectorAll('.tabpanel'));
+  function show(id){
+    tabs.forEach(function(t){t.classList.toggle('active',t.dataset.tab===id);});
+    panels.forEach(function(p){p.classList.toggle('active',p.id==='tab-'+id);});
+  }
+  tabs.forEach(function(t){t.addEventListener('click',function(){show(t.dataset.tab);});});
+  document.addEventListener('click',function(e){
+    var a=e.target.closest('a[data-goto]');
+    if(!a)return;
+    show(a.dataset.goto);
+    var el=document.querySelector(a.getAttribute('href'));
+    if(el){if(el.tagName==='DETAILS')el.open=true;setTimeout(function(){el.scrollIntoView({behavior:'smooth',block:'start'});},0);}
+  });
+  if(location.hash){
+    var el=document.querySelector(location.hash);
+    if(el&&el.classList.contains('healer')){show('findings');el.open=true;el.scrollIntoView();}
+  }
+})();
+</script>
+</body>
+</html>

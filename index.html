@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Heal Suite — a self-maintaining repo immune system for Claude Code</title>
+<meta name="description" content="A repo immune system for Claude Code: 14 auditing healers that detect drift, fix the mechanical, and prevent recurrence." />
+<meta property="og:title" content="The Heal Suite" />
+<meta property="og:description" content="A repo immune system for Claude Code: 14 auditing healers that detect drift, fix the mechanical, and prevent recurrence." />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Heal Suite" />
+<meta property="og:url" content="https://durchnull.github.io/heal-suite/" />
+<meta property="og:image" content="https://durchnull.github.io/heal-suite/og-overview.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://durchnull.github.io/heal-suite/og-overview.png" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🩺</text></svg>" />
+<!-- Preview copy of the suite's overview page.
+     Synced from the private development repo via tools/sync-overview.mjs until the first release. -->
+<style>
+  :root {
+    --ink: #1a2332;
+    --ink-soft: #4a5568;
+    --ink-faint: #8494a8;
+    --paper: #fafbfc;
+    --card: #ffffff;
+    --line: #e3e8ee;
+    --accent: #0d9478;
+    --accent-soft: #e6f5f1;
+    --accent-deep: #086350;
+    --amber: #b45309;
+    --amber-soft: #fef3e2;
+    --blue: #1d4ed8;
+    --blue-soft: #e8eefc;
+    --violet: #6d28d9;
+    --violet-soft: #f1ebfc;
+    --rose: #be123c;
+    --rose-soft: #fdeaef;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: #eef1f5;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 0.1em 0.4em;
+    white-space: nowrap;
+  }
+  a { color: var(--accent-deep); }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+
+  /* ── nav ─────────────────────────────────────────── */
+  nav {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(250, 251, 252, 0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  nav .wrap { display: flex; align-items: center; gap: 22px; height: 54px; }
+  nav .brand { font-weight: 800; letter-spacing: -0.02em; }
+  .brand span { color: var(--accent); }
+  nav a.link {
+    color: var(--ink-soft); text-decoration: none; font-size: 0.87rem; font-weight: 500;
+  }
+  nav a.link:hover { color: var(--accent-deep); }
+  @media (max-width: 720px) { nav a.link { display: none; } }
+
+  /* ── hero ────────────────────────────────────────── */
+  header { padding: 84px 0 60px; text-align: center; position: relative; overflow: hidden; }
+  header::before {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(600px 280px at 20% 0%, var(--accent-soft), transparent 70%),
+      radial-gradient(600px 280px at 80% 10%, var(--blue-soft), transparent 70%);
+    pointer-events: none;
+  }
+  header .wrap { position: relative; }
+  .eyebrow {
+    display: inline-block; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent-deep);
+    background: var(--accent-soft); border: 1px solid #c4e8df;
+    border-radius: 999px; padding: 5px 14px; margin-bottom: 22px;
+  }
+  h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; letter-spacing: -0.03em;
+    line-height: 1.12; margin-bottom: 18px;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+  .lede {
+    max-width: 680px; margin: 0 auto 34px; font-size: 1.12rem; color: var(--ink-soft);
+  }
+  .stats { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+  .stat {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 14px 22px; min-width: 128px;
+    box-shadow: 0 1px 3px rgba(20, 30, 50, 0.05);
+  }
+  .stat b { display: block; font-size: 1.7rem; letter-spacing: -0.02em; color: var(--accent-deep); }
+  .stat span { font-size: 0.78rem; color: var(--ink-faint); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* ── sections ────────────────────────────────────── */
+  section { padding: 58px 0; }
+  section + section { border-top: 1px solid var(--line); }
+  h2 {
+    font-size: 1.65rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px;
+  }
+  h2 .num { color: var(--accent); font-family: var(--mono); font-size: 1.05rem; margin-right: 10px; }
+  .sub { color: var(--ink-soft); max-width: 760px; margin-bottom: 32px; }
+  h3 { font-size: 1.05rem; font-weight: 700; margin: 26px 0 10px; }
+  p + p { margin-top: 12px; }
+
+  /* ── pipeline / loop diagram ─────────────────────── */
+  .loop {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: stretch; justify-content: center;
+    margin: 28px 0 10px;
+  }
+  .loop .step {
+    flex: 1 1 150px; max-width: 190px; background: var(--card);
+    border: 1px solid var(--line); border-top: 3px solid var(--accent);
+    border-radius: 10px; padding: 14px 14px 12px; position: relative;
+    box-shadow: 0 1px 3px rgba(20, 30, 50, 0.05);
+  }
+  .loop .step.alt { border-top-color: var(--blue); }
+  .loop .step.warn { border-top-color: var(--amber); }
+  .loop .step.viol { border-top-color: var(--violet); }
+  .loop .step .k { font-family: var(--mono); font-size: 0.72rem; color: var(--ink-faint); }
+  .loop .step .t { font-weight: 700; font-size: 0.94rem; margin: 2px 0 4px; }
+  .loop .step .d { font-size: 0.8rem; color: var(--ink-soft); line-height: 1.45; }
+  .loop .arrow {
+    align-self: center; color: var(--ink-faint); font-size: 1.3rem; font-weight: 700;
+    padding: 0 2px; user-select: none;
+  }
+  .loop-back {
+    text-align: center; color: var(--ink-faint); font-size: 0.82rem; margin-top: 6px;
+  }
+  .loop-back b { color: var(--accent-deep); }
+
+  /* ── healer roster grid ──────────────────────────── */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(235px, 1fr)); gap: 14px; }
+  .healer {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 16px; box-shadow: 0 1px 3px rgba(20, 30, 50, 0.04);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .healer .name { font-family: var(--mono); font-weight: 700; font-size: 0.92rem; }
+  .healer .name::before { content: "/heal:"; color: var(--ink-faint); font-weight: 400; }
+  .healer .axis { font-size: 0.82rem; color: var(--ink-soft); line-height: 1.5; flex: 1; }
+  .badges { display: flex; gap: 6px; flex-wrap: wrap; }
+  .badge {
+    font-size: 0.68rem; font-weight: 700; border-radius: 999px; padding: 2px 9px;
+    letter-spacing: 0.02em;
+  }
+  .b-fix { background: var(--accent-soft); color: var(--accent-deep); }
+  .b-branch { background: var(--blue-soft); color: var(--blue); }
+  .b-score { background: var(--violet-soft); color: var(--violet); }
+  .b-suggest { background: var(--amber-soft); color: var(--amber); }
+  .b-first { background: var(--rose-soft); color: var(--rose); }
+
+  .meta-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(235px, 1fr)); gap: 14px; margin-top: 14px; }
+  .meta-card {
+    background: linear-gradient(180deg, #ffffff, #f6f9f8);
+    border: 1px dashed #b9cfc9; border-radius: 12px; padding: 16px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .meta-card .name { font-family: var(--mono); font-weight: 700; font-size: 0.92rem; }
+  .meta-card .name::before { content: "/heal:"; color: var(--ink-faint); font-weight: 400; }
+  .meta-card .axis { font-size: 0.82rem; color: var(--ink-soft); line-height: 1.5; }
+  .meta-card .tag { font-size: 0.68rem; font-weight: 700; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.08em; }
+
+  /* ── tables ──────────────────────────────────────── */
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-top: 8px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); }
+  tbody tr:hover { background: #f4f7f9; }
+  td code { white-space: nowrap; }
+
+  /* ── terminal / file-tree blocks ─────────────────── */
+  .term {
+    background: #0f1720; color: #d7e2ec; border-radius: 12px; padding: 18px 20px;
+    font-family: var(--mono); font-size: 0.83rem; line-height: 1.75; overflow-x: auto;
+    margin: 16px 0;
+  }
+  .term .c { color: #64798c; }        /* comment */
+  .term .g { color: #4fd1a5; }        /* green   */
+  .term .y { color: #e9b872; }        /* amber   */
+  .term .b { color: #7fb3f5; }        /* blue    */
+  .term .p { color: #c79bf2; }        /* violet  */
+
+  /* ── callouts ────────────────────────────────────── */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--accent-soft);
+    border-radius: 0 10px 10px 0; padding: 14px 18px; margin: 18px 0; font-size: 0.92rem;
+  }
+  .callout.amber { border-left-color: var(--amber); background: var(--amber-soft); }
+  .callout.blue { border-left-color: var(--blue); background: var(--blue-soft); }
+  .callout b:first-child { display: block; margin-bottom: 3px; }
+
+  /* ── two-col ─────────────────────────────────────── */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+  @media (max-width: 760px) { .cols { grid-template-columns: 1fr; } }
+
+  ul.tight { padding-left: 20px; }
+  ul.tight li { margin: 7px 0; font-size: 0.93rem; }
+  ul.tight li b { color: var(--ink); }
+
+  footer {
+    border-top: 1px solid var(--line); padding: 34px 0 48px;
+    color: var(--ink-faint); font-size: 0.84rem; text-align: center;
+  }
+  footer code { font-size: 0.8rem; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">heal<span>·</span>suite</div>
+    <a class="link" href="#what">What it is</a>
+    <a class="link" href="#loop">The loop</a>
+    <a class="link" href="#roster">Roster</a>
+    <a class="link" href="#usage">Usage</a>
+    <a class="link" href="#artifacts">Artifacts</a>
+    <a class="link" href="#maintenance">How it evolves</a>
+    <a class="link" href="demo-run.html">Sample run ↗</a>
+  </div>
+</nav>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Heal Suite · Claude Code plugin — in development</div>
+    <h1>A repo that <em>audits, fixes, and hardens</em> itself.</h1>
+    <p class="lede">
+      The heal suite is a family of <code>/heal:*</code> slash commands: fourteen specialist
+      auditors — each owning one health axis — plus six meta commands: an orchestrator, a fixer,
+      a preventer, a report renderer, a run lister, and an installer that stands the suite up in
+      other projects. Run it on a loop and the codebase converges toward green
+      instead of quietly rotting.
+    </p>
+    <div class="stats">
+      <div class="stat"><b>14</b><span>specialist healers</span></div>
+      <div class="stat"><b>6</b><span>meta commands</span></div>
+      <div class="stat"><b>10</b><span>axes auto-fix</span></div>
+      <div class="stat"><b>1</b><span>number to trend</span></div>
+    </div>
+  </div>
+</header>
+
+<section id="what">
+  <div class="wrap">
+    <h2><span class="num">01</span>What is it?</h2>
+    <p class="sub">
+      Every codebase drifts: docs go stale, deps age, invariants erode, migrations grow footguns,
+      the same bug class returns. Traditionally a human notices — eventually. The heal suite makes
+      drift <b>detectable, persistent, fixable, and preventable</b> as a repeatable, mostly
+      automated process.
+    </p>
+    <div class="cols">
+      <div>
+        <h3>One healer, one axis</h3>
+        <p>
+          Each command in <code>.claude/commands/heal/</code> is a self-contained audit spec:
+          the surface it owns, the checks it runs, its fix policy, and the <code>.heal/backlog.md</code>
+          heading it converges findings to. <code>/heal:security</code> knows nothing about bundle
+          budgets; <code>/heal:perf</code> never touches auth. Narrow scope is what keeps each
+          audit deep and each verdict trustworthy.
+        </p>
+        <h3>An orchestrator, not a monolith</h3>
+        <p>
+          <code>/heal:all</code> discovers the healers from disk (never a hardcoded list), fans the
+          independent read-only ones out as parallel agents, and fuses their reports into one
+          dashboard. Its real value is <b>cross-axis correlation</b>: an IDOR flagged by
+          <code>security</code>, an ownership-scoping gap flagged by <code>arch</code>, and a
+          missing abuse-case test flagged by <code>tests</code> are one root cause seen through
+          three lenses — and get ranked as one high-leverage cluster.
+        </p>
+      </div>
+      <div>
+        <h3>Idempotent by contract</h3>
+        <p>
+          Every healer is written to run on a schedule: a healthy repo yields a clean report and
+          zero edits. Findings that can't be fixed now are persisted as checklist items so the
+          next run <b>builds on the last</b> instead of re-reporting the same thing forever.
+        </p>
+        <h3>What it can achieve</h3>
+        <ul class="tight">
+          <li><b>A single health number + backlog count</b> a loop or schedule can watch trend over time.</li>
+          <li><b>Findings as data</b> — fingerprinted <code>findings.json</code> sidecars enable new / fixed / persisting diffs between runs.</li>
+          <li><b>Fixes as reviewable PRs</b> — mechanical fixes land as focused branches off <code>dev</code>, never silent edits to protected branches.</li>
+          <li><b>Fewer repeat findings</b> — recurring issues get promoted into durable guardrails (rules, hooks, scripts, tests).</li>
+          <li><b>A shareable HTML dashboard</b> per run — zero token cost, pure render of on-disk data.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout blue">
+      <b>Not the same as an adversarial sweep (code-review / a bug hunt).</b>
+      A healer is a <b>standing, axis-scoped drift audit</b>: it re-checks a fixed roster of
+      known-bad patterns, deprecations, and invariant violations, tuned for <b>repeatability</b> —
+      stable fingerprints, low false positives, a trend you can watch converge. An adversarial
+      sweep is the opposite shape: a <b>one-shot, recall-oriented</b> attempt to <em>break</em>
+      specific code paths (an IDOR on one unchecked id, a lost edit on unmount, a mis-parsed
+      external shape). That reasoning is expensive and non-deterministic — it finds a different
+      subset each run and can't be fingerprinted into a trend — so it belongs on a diff (what
+      <code>/code-review</code> is for), not run whole-repo every cycle. The two are complementary:
+      when a hunt finds a real bug, the suite <b>absorbs</b> it by distilling the lesson into a
+      deterministic check inside the owning healer (via <code>/heal:prevent</code> and
+      <code>/heal:self</code>) — so the hard reasoning happens once and becomes cheap to re-verify
+      forever.
+    </div>
+  </div>
+</section>
+
+<section id="loop">
+  <div class="wrap">
+    <h2><span class="num">02</span>The loop: detect → persist → apply → prevent</h2>
+    <p class="sub">
+      The suite is a closed feedback loop. Detection is cheap to re-run; applying and preventing
+      are deliberate, user-triggered steps — so the system proposes aggressively but never
+      guesses on decisions that are yours to make.
+    </p>
+
+    <div class="loop">
+      <div class="step">
+        <div class="k">/heal:all</div>
+        <div class="t">Detect</div>
+        <div class="d"><code>self</code> runs first, then 13 healers fan out in parallel. A gate preflight + cost estimate print before any token is spent; deterministic gates run alongside the LLM audits.</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="step alt">
+        <div class="k">.heal/runs/&lt;run-id&gt;/</div>
+        <div class="t">Persist</div>
+        <div class="d">Every report + fingerprinted findings hit disk. Runs are resumable — an interrupt skips already-recorded healers.</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="step alt">
+        <div class="k">.heal/backlog.md</div>
+        <div class="t">Converge</div>
+        <div class="d">Unfixed findings land under per-axis headings, idempotently. The backlog is the durable state between runs.</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="step warn">
+        <div class="k">/heal:fix</div>
+        <div class="t">Apply</div>
+        <div class="d">Drives the backlog to green: mechanical items as focused PRs, each built in an isolated worktree — big sweeps fan out to parallel fixer agents. Judgment items surface as explicit questions.</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="step viol">
+        <div class="k">/heal:prevent</div>
+        <div class="t">Prevent</div>
+        <div class="d">Proposes the cheapest durable guardrail per finding; escalates when a finding recurs despite one.</div>
+      </div>
+    </div>
+    <div class="loop-back">⟲ &nbsp;the next <b>/heal:all</b> verifies the fixes held and the guardrails are holding — the trend report proves it with data, not memory</div>
+
+    <div class="callout blue">
+      <b>Detection never mutates; mutation never audits.</b>
+      Healers in report mode are read-only. <code>/heal:fix</code> re-processes what the healers
+      already found (no re-audit cost), and <code>/heal:prevent --apply</code> writes only
+      low-risk artifacts. Contract-touching, visual, and security-posture changes always stop
+      for a human call.
+    </div>
+  </div>
+</section>
+
+<section id="roster">
+  <div class="wrap">
+    <h2><span class="num">03</span>The roster</h2>
+    <p class="sub">
+      Fourteen healers, in <code>/heal:all</code>'s run order — cheap deterministic gates first,
+      the heavy LLM reads last. Badges show each healer's mode support:
+      <span class="badge b-fix">--fix</span> can auto-apply low-risk fixes,
+      <span class="badge b-branch">--branch</span> can scope to the current branch's diff,
+      <span class="badge b-score">scored</span> produces a 0–100 rating,
+      <span class="badge b-suggest">suggest-only</span> never auto-fixes.
+    </p>
+
+    <div class="grid">
+      <div class="healer">
+        <div class="name">self</div>
+        <div class="axis">Meta-audit of the healers themselves — stale paths, wrong facts, coverage holes. Runs first so a drifted healer is caught before its output is trusted.</div>
+        <div class="badges"><span class="badge b-first">runs first</span><span class="badge b-fix">--fix</span></div>
+      </div>
+      <div class="healer">
+        <div class="name">arch</div>
+        <div class="axis">Architecture drift vs the CLAUDE.md invariants, incl. the engine-map ↔ recompute parallel-layer check.</div>
+        <div class="badges"><span class="badge b-fix">--fix</span><span class="badge b-branch">--branch</span></div>
+      </div>
+      <div class="healer">
+        <div class="name">api</div>
+        <div class="axis">Contract audit across the HTTP boundary — routes ↔ fetch wrappers ↔ Zod schemas ↔ error codes ↔ query-key invalidation.</div>
+        <div class="badges"><span class="badge b-suggest">suggest-only</span><span class="badge b-branch">--branch</span></div>
+      </div>
+      <div class="healer">
+        <div class="name">db</div>
+        <div class="axis">Drizzle schema ↔ migration drift, journal ordering, PK footguns, FK indexes, transactional + backfill-safe writes, soft-delete key reconciliation.</div>
+        <div class="badges"><span class="badge b-fix">--fix</span></div>
+      </div>
+      <div class="healer">
+        <div class="name">ci</div>
+        <div class="axis">GitHub Actions currency, hermeticity, least privilege, and quiet logs — no tolerated deprecation noise.</div>
+        <div class="badges"><span class="badge b-fix">--fix</span></div>
+      </div>
+      <div class="healer">
+        <div class="name">packages</div>
+        <div class="axis">Dependency currency (what can bump safely, respecting the pins) + a trust pass flagging deps not worth depending on.</div>
+        <div class="badges"><span class="badge b-fix">--fix</span></div>
+      </div>
+      <div class="healer">
+        <div class="name">ai</div>
+        <div class="axis">LLM / image providers &amp; models still active and non-deprecated; call-site misuse; newly released models worth adopting.</div>
+        <div class="badges"><span class="badge b-fix">--fix</span><span class="badge b-branch">--branch</span></div>
+      </div>
+      <div class="healer">
+        <div class="name">security</div>
+        <div class="axis">Secrets, auth/session, IDOR &amp; privilege escalation, mass assignment, injection, XSS, CSRF, prompt injection, headers, dependency advisories.</div>
+        <div class="badges"><span class="badge b-fix">--fix</span><span class="badge b-branch">--branch</span></div>
+      </div>
+      <div class="healer">
+        <div class="name">tests</div>
+        <div class="axis">Tests that don't earn their keep (no real assertion, coupled, redundant, flaky) + coverage gaps on the macro engine.</div>
+        <div class="badges"><span class="badge b-fix">--fix</span></div>
+      </div>
+      <div class="healer">
+        <div class="name">quality</div>
+        <div class="axis">SOLID, accidental duplication, complexity hotspots, type-safety erosion — a deterministic size-watch + dead-export triage ranks the read; scored so the trend is trackable.</div>
+        <div class="badges"><span class="badge b-suggest">suggest-only</span><span class="badge b-branch">--branch</span><span class="badge b-score">scored</span></div>
+      </div>
+      <div class="healer">
+        <div class="name">perf</div>
+        <div class="axis">Server N+1 / query shapes, bundle-size budgets, client render &amp; asset cost — scored.</div>
+        <div class="badges"><span class="badge b-suggest">suggest-only</span><span class="badge b-branch">--branch</span><span class="badge b-score">scored</span></div>
+      </div>
+      <div class="healer">
+        <div class="name">docs</div>
+        <div class="axis">Prose sources of truth vs reality: documented commands == scripts, env vars == .env.example == code, pins == installed, cited paths exist, plan-doc statuses honest.</div>
+        <div class="badges"><span class="badge b-fix">--fix</span></div>
+      </div>
+      <div class="healer">
+        <div class="name">a11y</div>
+        <div class="axis">Semantic HTML, accessible names / ARIA, keyboard operability, focus management, contrast (light theme).</div>
+        <div class="badges"><span class="badge b-fix">--fix</span><span class="badge b-branch">--branch</span></div>
+      </div>
+      <div class="healer">
+        <div class="name">design</div>
+        <div class="axis">UI consistency &amp; design-system adherence: reuse over raw markup, token drift, responsive floor, gallery completeness — a deterministic jscpd duplicate-cluster precompute seeds the read; scored.</div>
+        <div class="badges"><span class="badge b-suggest">suggest-only</span><span class="badge b-branch">--branch</span><span class="badge b-score">scored</span></div>
+      </div>
+    </div>
+
+    <h3>The six meta commands (not healers — they have no axis of their own)</h3>
+    <div class="meta-row">
+      <div class="meta-card">
+        <div class="tag">Orchestrator</div>
+        <div class="name">all</div>
+        <div class="axis">Runs the healer set as one system: parallel fan-out, run persistence, the fused dashboard, TODO convergence, trend, and the tail preventer.</div>
+      </div>
+      <div class="meta-card">
+        <div class="tag">Applier</div>
+        <div class="name">fix</div>
+        <div class="axis">The backlog → green edge. Applies mechanical items as focused PRs off <code>dev</code> — each in an isolated worktree, never the shared tree; ≥&nbsp;3 groups fan out to parallel fixer agents with their own throwaway test DBs. Ticks items <code>[x]</code>, lists judgment items as explicit questions.</div>
+      </div>
+      <div class="meta-card">
+        <div class="tag">Preventer</div>
+        <div class="name">prevent</div>
+        <div class="axis">The detect → prevent edge. Proposes the cheapest durable guardrail per finding; runs automatically at the tail of every sweep.</div>
+      </div>
+      <div class="meta-card">
+        <div class="tag">Renderer</div>
+        <div class="name">report</div>
+        <div class="axis">Pure render of a run's on-disk data into a self-contained <code>index.html</code> dashboard. No model, no token cost, regenerable anytime.</div>
+      </div>
+      <div class="meta-card">
+        <div class="tag">Installer</div>
+        <div class="name">init</div>
+        <div class="axis">Stands the suite up in another project: copies the project-free engine verbatim, discovers the target's surfaces (proposing ratifiable invariants where its CLAUDE.md is thin), regenerates the leaf healers, validates with the suite's own gates.</div>
+      </div>
+      <div class="meta-card">
+        <div class="tag">Lister</div>
+        <div class="name">list</div>
+        <div class="axis">Lists a run's open findings severity-sorted — each with the id <code>/heal:fix</code> takes, plus suggested one-swoop batches that share a fix. Accepted tradeoffs sit in their own section; resolved items stay hidden unless <code>--resolved</code>. Reads the persisted run; runs nothing.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="usage">
+  <div class="wrap">
+    <h2><span class="num">04</span>How it's used</h2>
+    <p class="sub">
+      Everything is a slash command in Claude Code. The common flows, from broadest to most surgical:
+    </p>
+
+    <table>
+      <thead><tr><th style="width:38%">Command</th><th>What happens</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>/heal:all</code></td>
+          <td>The full sweep, report-only. Prints a gate preflight + per-healer cost estimate up front, then <code>self</code> first, then the pack in parallel. Ends with the dashboard, the trend vs the previous run, and the preventer's proposals.</td>
+        </tr>
+        <tr>
+          <td><code>/heal:all --fix</code></td>
+          <td>Same sweep, but healers that support <code>--fix</code> apply their low-risk mechanical fixes. Runs sequentially so edits don't race.</td>
+        </tr>
+        <tr>
+          <td><code>/heal:all --branch</code></td>
+          <td>Pre-merge mode: branch-scoped healers audit only the current branch's changes; findings belong in the PR, not <code>.heal/backlog.md</code>.</td>
+        </tr>
+        <tr>
+          <td><code>/heal:all arch,security,db</code></td>
+          <td>A subset sweep — just the named healers.</td>
+        </tr>
+        <tr>
+          <td><code>/heal:security</code> <span style="color:var(--ink-faint)">(any healer)</span></td>
+          <td>One healer standalone. It opens its own single-healer run so the artifacts and trend data are identical to a sweep's.</td>
+        </tr>
+        <tr>
+          <td><code>/heal:fix</code></td>
+          <td>Reads the <code>.heal/backlog.md</code> backlog (plus the newest run's detail), applies the mechanical items as focused PRs — each in an isolated worktree — and stops with questions for the rest. Pass finding ids to fix just those (several ids = one batch, one PR). <code>--all</code> also attempts judgment items; <code>--dry-run</code> plans only.</td>
+        </tr>
+        <tr>
+          <td><code>/heal:prevent --apply</code></td>
+          <td>Writes the low-risk guardrail artifacts the last run proposed (a rule file, a CLAUDE.md line, an inert draft script) — never live hook wiring.</td>
+        </tr>
+        <tr>
+          <td><code>/heal:report</code></td>
+          <td>Re-renders the newest run's HTML dashboard on demand (or for a given run-id).</td>
+        </tr>
+        <tr>
+          <td><code>/heal:list</code></td>
+          <td>Lists the newest run's open findings severity-sorted, each with a ready <code>/heal:fix</code> id, plus one-swoop batch suggestions (or a given run-id); pass a finding id for its full detail block, <code>--resolved</code> to reveal resolved items. Reads the persisted run; runs nothing.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <b>The intended rhythm</b>
+      Run <code>/heal:all</code> on a loop or schedule and watch two things: the <b>overall
+      health number</b> (mean of the scored axes) and the <b>findings burden</b> (a deterministic
+      severity-weighted sum over every axis). When the backlog has substance, run
+      <code>/heal:fix</code>, review the PRs, answer the "needs your call" questions. Occasionally
+      apply the prevention proposals. Each cycle should leave fewer findings than the last —
+      and the trend report proves whether it did.
+    </div>
+  </div>
+</section>
+
+<section id="artifacts">
+  <div class="wrap">
+    <h2><span class="num">05</span>Anatomy of a run</h2>
+    <p class="sub">
+      One <code>/heal:all</code> invocation is a <b>run</b>, materialised on disk (local,
+      gitignored). The manifest makes runs resumable; the sidecars make findings diffable.
+    </p>
+
+    <div class="term">
+<span class="c"># .heal/runs/&lt;run-id&gt;/ — everything a run produces</span>
+.heal/runs/2026-07-02T08-14-31Z-ab3x/
+├── <span class="b">run.json</span>                <span class="c"># manifest: healer set, mode, status, stats, provenance — makes the run resumable</span>
+├── <span class="g">self.md</span> … <span class="g">design.md</span>    <span class="c"># one full report per healer + its duration/token statistics</span>
+├── <span class="g">self.findings.json</span> …   <span class="c"># fingerprinted findings — the data behind trend &amp; recurrence</span>
+├── <span class="p">prevent.md</span>              <span class="c"># the tail preventer's guardrail proposals for this run</span>
+├── <span class="y">summary.md</span>              <span class="c"># roll-up: totals, cost split (healers vs orchestration)</span>
+└── <span class="y">index.html</span>              <span class="c"># self-contained dashboard — severity chart, findings, tokens</span>
+    </div>
+
+    <div class="cols">
+      <div>
+        <h3>Durable state lives in .heal/backlog.md</h3>
+        <p>
+          Run dirs are ephemeral; the backlog is not. Each axis owns a heading
+          (<code>## Security health</code>, <code>## Quality debt</code>,
+          <code>## Healer drift</code>, …) and converges to it idempotently.
+          <code>/heal:fix</code> ticks items <code>[x]</code> with a dated resolution note and
+          moves them to <code>.heal/archive/backlog.md</code> in the same commit as the fix — the
+          archive holds the checked audit trail, the active file only open work.
+        </p>
+      </div>
+      <div>
+        <h3>Trend as data, not memory</h3>
+        <p>
+          <code>heal-run trend</code> joins a run's findings against the previous run <b>by
+          fingerprint id</b> and prints new / fixed / persisting / accepted counts plus the
+          burden delta. Accepted risks live in <code>.heal/baseline.json</code> — the single
+          source of acceptance truth — so they never re-count as new. No LLM recollection
+          involved — it's a deterministic join.
+        </p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <b>Publishable numbers, not vibes.</b>
+      Every run's provenance — suite version, frozen metrics version, the exact model, the audited
+      git sha — rides in <code>run.json</code> and is mirrored onto a long-horizon
+      <code>runs/history.jsonl</code>, so a score is never separated from the conditions that
+      produced it. Closing a finding records a <b>verdict</b> (fixed / wontfix / false-positive /
+      duplicate / obsolete), from which the suite reports its own <b>precision</b> with an honest
+      denominator: auto-resolutions and still-open findings sit in their own buckets, and dogfood
+      runs never pool with external-repo runs.
+    </div>
+  </div>
+</section>
+
+<section id="maintenance">
+  <div class="wrap">
+    <h2><span class="num">06</span>How it's maintained — and how it evolves</h2>
+    <p class="sub">
+      The suite's biggest risk is auditing against yesterday's repo: a healer citing a moved file
+      or a stale pin reports phantom drift, or worse, silently stops covering real drift. So the
+      suite audits <b>itself</b>, on three reinforcing layers.
+    </p>
+
+    <div class="loop">
+      <div class="step warn">
+        <div class="k">scripts/check-heal-suite.mjs</div>
+        <div class="t">Layer 1 · Deterministic gate</div>
+        <div class="d">Pre-commit + Stop hook. Mechanically enforces suite structure: frontmatter, flag lists, TODO headings, cited scripts exist, rule globs still match files.</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="step">
+        <div class="k">/heal:self</div>
+        <div class="t">Layer 2 · Meta-audit</div>
+        <div class="d">The judgment half: facts vs CLAUDE.md, coverage holes, cross-healer drift &amp; duplication. Runs first in every sweep.</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="step viol">
+        <div class="k">--self-test drills</div>
+        <div class="t">Layer 3 · Test the testers</div>
+        <div class="d">Mutation drill: inject known drift classes into a fixture copy and assert the gate catches each. A missed mutation is a high finding — the gate has a blind spot.</div>
+      </div>
+    </div>
+
+    <h3>Evolution is proposal-driven, never self-rewriting</h3>
+    <div class="cols">
+      <div>
+        <ul class="tight">
+          <li><b>New healers are auto-discovered.</b> <code>/heal:all</code> reads the healer set from disk, so dropping a new <code>heal/*.md</code> in place adds it to every future sweep — and the gate immediately enforces its structure.</li>
+          <li><b>Coverage holes become drafts.</b> When <code>/heal:self</code> finds an invariant no healer checks, it drafts a ready-to-apply check — evidence, owning healer, exact placement, copy-pasteable text — but a human applies it. This prevents command bloat, overfitting, and structural corruption in the very files that drive the loop.</li>
+        </ul>
+      </div>
+      <div>
+        <ul class="tight">
+          <li><b>Recurrence escalates.</b> <code>/heal:prevent</code> proposes a guardrail on a finding's <em>first</em> appearance and escalates emphasis when it recurs — and flags guardrails that exist but aren't holding, so they get promoted to something stronger.</li>
+          <li><b>Guardrails graduate into code.</b> The deterministic gate itself was drafted by <code>/heal:prevent</code> on two consecutive runs before being wired in. The trajectory is always: LLM finding → persistent backlog → durable script/rule/test.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout amber">
+      <b>This page maintains itself the same way.</b>
+      <code>index.html</code> is part of the suite's documented surface: <code>/heal:self</code>
+      checks that the roster, flag badges, run order, and lifecycle shown here still match
+      <code>.claude/commands/heal/*.md</code>, and re-syncs this page under <code>--fix</code>.
+      Add, remove, or re-flag a healer, and the very next sweep flags this page as drifted until
+      it's regenerated. The commands are the source of truth — this page is a render of them.
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    heal·suite — preview · plugin in development · <a href="demo-run.html">sample run dashboard</a>
+  </div>
+</footer>
+
+</body>
+</html>
